@@ -1,0 +1,4 @@
+[console_scripts]
+Client_NavigateToPose = point_nav_system.Client_NavigateToPose:main
+initial_pose_pub = point_nav_system.initial_pose_pub:main
+
