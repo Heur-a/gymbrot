@@ -1,3 +1,13 @@
+"""
+ROS2 Navigation Node for handling goal requests and executing navigation actions.
+
+This node subscribes to location goals and interfaces with Nav2's NavigateToPose action server
+to execute autonomous navigation commands.
+
+License: Apache 2.0
+Copyright (c) 2025 Gymbrot Team
+"""
+
 import rclpy
 import math
 from interfaces_gymbrot.msg import LocationGoal
@@ -9,7 +19,18 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 
 class NavigationNode(Node):
+    """ROS2 Node that handles navigation goals and executes them using Nav2's NavigateToPose action.
+
+        Attributes:
+            _action_client (ActionClient): Client for the NavigateToPose action server
+            subscription (Subscription): Subscriber for LocationGoal messages
+            current_goal (Point): Currently active navigation goal coordinates
+            last_sent_goal (Point): Last successfully sent goal coordinates
+            is_active (bool): Flag indicating if a navigation action is currently in progress
+            epsilon (float): Tolerance threshold for goal position comparisons
+        """
     def __init__(self):
+        """Initialize the navigation node and its components."""
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
         self.subscription = self.create_subscription(
@@ -24,6 +45,11 @@ class NavigationNode(Node):
         self.epsilon = 0.01  # Margen para comparación de coordenadas
 
     def location_goal_callback(self, msg):
+        """Callback for processing incoming navigation goals.
+
+                Args:
+                    msg (LocationGoal): Received goal coordinates with x and y positions
+                """
         new_goal = Point()
         new_goal.x = msg.x
         new_goal.y = msg.y
@@ -39,6 +65,14 @@ class NavigationNode(Node):
             self.send_goal(new_goal)
 
     def send_goal(self, point):
+        """Send a navigation goal to the action server.
+
+                Args:
+                    point (Point): Target position in map coordinates
+
+                Raises:
+                    RuntimeError: If action server is unavailable
+                """
         if self._is_same_goal(point, self.last_sent_goal):
             self.get_logger().info('Objetivo idéntico al anterior, ignorando...')
             return
@@ -61,7 +95,16 @@ class NavigationNode(Node):
         )
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
-    def _is_same_goal(self, goal1, goal2):
+    def _is_same_goal(self, goal1, goal2) -> bool:
+        """Compare two goals with position tolerance.
+
+                Args:
+                    goal1 (Point): First goal to compare
+                    goal2 (Point): Second goal to compare
+
+                Returns:
+                    bool: True if goals are within epsilon tolerance, False otherwise
+                """
         """Compara dos objetivos con margen de error epsilon"""
         if goal1 is None or goal2 is None:
             return False
@@ -69,6 +112,7 @@ class NavigationNode(Node):
                 math.isclose(goal1.y, goal2.y, abs_tol=self.epsilon))
 
     def goal_response_callback(self, future):
+        """Handle response from action server after goal submission."""
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
             self.get_logger().info('Objetivo rechazado')
@@ -80,6 +124,7 @@ class NavigationNode(Node):
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
+        """Process final result of navigation action."""
         try:
             result = future.result()
             status = result.status
@@ -103,6 +148,11 @@ class NavigationNode(Node):
                 self.send_goal(self.current_goal)
 
     def feedback_callback(self, feedback_msg):
+        """Process ongoing navigation feedback.
+
+                Args:
+                    feedback_msg (NavigateToPose.Feedback): Navigation progress feedback
+                """
         feedback = feedback_msg.feedback
         current_pos = feedback.current_pose.pose.position
         self.get_logger().info(
@@ -113,10 +163,17 @@ class NavigationNode(Node):
 
 
 def main(args=None):
+    """Main entry point for the navigation node."""
     rclpy.init(args=args)
-    node = NavigationNode()
-    rclpy.spin(node)
-    rclpy.shutdown()
+    navigator = NavigationNode()
+
+    try:
+        rclpy.spin(navigator)
+    except KeyboardInterrupt:
+        navigator.get_logger().info('Navigation node shutting down...')
+    finally:
+        navigator.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
