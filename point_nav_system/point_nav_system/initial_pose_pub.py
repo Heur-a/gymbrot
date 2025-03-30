@@ -35,8 +35,8 @@ class Publisher(Node):
         # Configure initial pose message
         msg = PoseWithCovarianceStamped()
         msg.header.frame_id = 'map'  # Coordinate frame for the pose
-        msg.pose.pose.position.x = 0.2  # X position in meters
-        msg.pose.pose.position.y = 0.0  # Y position in meters
+        msg.pose.pose.position.x = 2.0  # X position in meters
+        msg.pose.pose.position.y = -0.5 # Y position in meters
         msg.pose.pose.orientation.w = 1.0  # Neutral orientation (no rotation)
 
         # Publish and log information
