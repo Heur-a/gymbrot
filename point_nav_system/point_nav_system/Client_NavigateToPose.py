@@ -4,7 +4,7 @@ ROS2 Navigation Node for handling goal requests and executing navigation actions
 This node subscribes to location goals and interfaces with Nav2's NavigateToPose action server
 to execute autonomous navigation commands.
 
-License: Apache 2.0
+License: GNU 3.0
 Copyright (c) 2025 Gymbrot Team
 """
 

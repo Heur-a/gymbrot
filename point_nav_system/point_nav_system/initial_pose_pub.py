@@ -5,7 +5,7 @@ ROS2 Node for publishing initial robot pose estimation.
 This node publishes a single initial pose estimate for robot localization systems
 like AMCL (Adaptive Monte Carlo Localization).
 
-License: Apache 2.0
+License: GNU 3.0
 Copyright (c) 2023 Your Name/Organization
 """
 
