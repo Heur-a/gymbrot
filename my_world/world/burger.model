@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sdf version='1.6'>
+  <world name='default'>
+    <!-- override the default position of the camera !-->
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>0.319654 -1.0 25.0 0 1.5138 1.5708</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics name='default_physics' default='0' type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>false</shadows>
+      <grid>false</grid>
+      <origin_visual>false</origin_visual>
+    </scene>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+  
+<!--entrada-->
+	<model name='ReadingDesk_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_ReadingDesk_01</uri>
+        </include>
+        <pose frame=''>6 -4 0 0 -0 1.5708</pose>
+	</model>
+  <model name='ChairA_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_ChairA_01</uri>
+        </include>
+        <pose frame=''>6 -3.5 0.024685 1e-06 -0 1.55607</pose>
+	</model>
+  <model name='SecurityCamera_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_SecurityCamera_01</uri>
+        </include>
+        <pose frame=''>-9.199410 -4.5 2.084544 0 -0 1.5708</pose>
+	</model>
+  <model name='ShoeRack_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_ShoeRack_01</uri>
+        </include>
+        <pose frame=''>9 -5.173566 0 0 -0 1.5708</pose>
+	</model>
+  <model name='Trash_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Trash_01</uri>
+        </include>
+        <pose frame=''>7 -4 0.011 0 -0 0</pose>
+	</model>
+<!--fin entrada-->
+
+<!--vestuarios-->
+	<model name='Wardrobe_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Wardrobe_01</uri>
+        </include>
+        <pose frame=''>7.6 3 0 0 -0 0</pose>
+	</model>
+  <model name='Wardrobe_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Wardrobe_01</uri>
+        </include>
+        <pose frame=''>6.4 3 0 0 -0 0</pose>
+	</model>
+<!--fin vestuarios-->
+
+<!--cardio-->
+  
+<!--fin cardio-->
+
+<!--yoga-->
+	<model name='Ball_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Ball_01</uri>
+        </include>
+        <pose frame=''>-0.5 -3.8 0.318684 0 -0 0</pose>
+	</model>
+  <model name='Ball_01_002'>
+        <static>true</static>      
+        <include>
+            <uri>model://aws_robomaker_residential_Ball_01</uri>
+        </include>
+        <pose frame=''>1 -3 0.318684 0 -0 0</pose>
+	</model>
+	
+	<model name='Carpet_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Carpet_01</uri>
+        </include>
+        <pose frame=''>-0.5 -3.8 0.000585 0 -0 1.5708</pose>
+	</model>
+    <model name='Carpet_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Carpet_01</uri>
+        </include>
+        <pose frame=''>3.2 -3.8 0.000585 0 -0 1.5708</pose>
+	</model>
+<!--fin yoga-->
+	
+<!--pesas y maquinas-->
+  <model name='Dumbbell_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Dumbbell_01</uri>
+        </include>
+        <pose frame=''>-7.0 2 0.002183 0 -0 0</pose>
+	</model>
+  <model name='FitnessEquipment_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FitnessEquipment_01</uri>
+        </include>
+        <pose frame=''>-8.5 2 0.003168 0 -0 3.1416</pose>
+	</model>
+  <model name='Dumbbell_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Dumbbell_01</uri>
+        </include>
+        <pose frame=''>-7.0 -1 0.002183 0 -0 0</pose>
+	</model>
+  <model name='FitnessEquipment_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FitnessEquipment_01</uri>
+        </include>
+        <pose frame=''>-8.5 -1 0.003168 0 -0 3.1416</pose>
+	</model>
+  <model name='Dumbbell_01_003'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Dumbbell_01</uri>
+        </include>
+        <pose frame=''>-7.0 -4 0.002183 0 -0 0</pose>
+	</model>
+  <model name='FitnessEquipment_01_003'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FitnessEquipment_01</uri>
+        </include>
+        <pose frame=''>-8.5 -4 0.003168 0 -0 3.1416</pose>
+	</model>
+  <model name='Dumbbell_01_004'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Dumbbell_01</uri>
+        </include>
+        <pose frame=''>-0.5 4 0.002183 0 -0 1.5708</pose>
+	</model>
+  <model name='FitnessEquipment_01_004'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FitnessEquipment_01</uri>
+        </include>
+        <pose frame=''>-0.5 5 0.003168 0 -0 1.5708</pose>
+	</model>
+  <model name='Dumbbell_01_005'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Dumbbell_01</uri>
+        </include>
+        <pose frame=''>3.0 4 0.002183 0 -0 1.5708</pose>
+	</model>
+  <model name='FitnessEquipment_01_005'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FitnessEquipment_01</uri>
+        </include>
+        <pose frame=''>3 5 0.003168 0 -0 1.5708</pose>
+	</model>
+  <model name='AirconditionerA_01_001'>
+        <static>true</static>
+        <include>
+            <uri>model://aws_robomaker_residential_AirconditionerA_01</uri>
+        </include>
+        <pose frame=''>-9.199410 2.411230 2.084544 0 -0 0</pose>
+	</model>
+	
+<!--fin pesas-->
+
+<!--paredes-->
+  <!--pared1-->
+  <model name='FoldingDoor_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>-2.461096 1.844219 0.041881 0 -0 0</pose>
+	</model>
+	<model name='FoldingDoor_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>-2.461096 -4.3 0.041881 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_003'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>4.8912 -4.3 0 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_004'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>4.8912 -3.15 0 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_005'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>6.1 -2 0 0 -0 1.5708</pose>
+	</model>
+  <model name='FoldingDoor_01_006'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>8.2 1.844219 0 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_007'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>7 1.844219 0 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_008'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>5.8 1.844219 0 0 -0 0</pose>
+	</model>
+  <model name='FoldingDoor_01_009'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_01</uri>
+        </include>
+        <pose frame=''>-2.461096 -3.15 0.041881 0 -0 0</pose>
+	</model>
+  <!--pared 2-->
+  <model name='FoldingDoor_02_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_02</uri>
+        </include>
+        <pose frame=''>8.7 0.7 0 0 -0 1.5708</pose>
+	</model>
+  <model name='FoldingDoor_02_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_02</uri>
+        </include>
+        <pose frame=''>7.5 0.7 0 0 -0 1.5708</pose>
+	</model>
+  <model name='FoldingDoor_02_003'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FoldingDoor_02</uri>
+        </include>
+        <pose frame=''>6.3 0.7 0 0 -0 1.5708</pose>
+	</model>
+<!--fin paredes-->
+
+<!--base-->
+  <!--pared fuera-->
+  <model name='HouseWallB_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_HouseWallB_01</uri>
+        </include>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+	</model>
+
+  <!--suelo-->
+  <model name='FloorB_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_FloorB_01</uri>
+        </include>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+	</model>
+
+  <!--puerta-->
+  <model name='Door_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Door_01</uri>
+        </include>
+        <pose frame=''>6.001449 -5.549002 0 0 -0 0</pose>
+	</model>
+  <model name='Handle_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_Handle_01</uri>
+        </include>
+        <pose frame=''>5.724 -5.523 0.9938 0 -0 -3.1415</pose>
+	</model>
+
+  <!--ventanas-->
+  <model name='RoomWindow_01_001'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>-9.418600 -0.026285 0.502739 0 -0 0</pose>
+	</model>
+	<model name='RoomWindow_01_002'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>-9.418600 -2.374090 0.502739 0 -0 0</pose>
+	</model>
+	<model name='RoomWindow_01_003'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>9.422616 -3.373981 0.502739 0 -0 -3.136099</pose>
+	</model>
+	<model name='RoomWindow_01_004'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>9.422558 0.968520 0.496581 0 -0 -3.136099</pose>
+	</model>
+	<model name='RoomWindow_01_005'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>4.722317 4.470281 0.502739 0 -0 -3.136099</pose>
+	</model>
+	<model name='RoomWindow_01_006'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>3.488520 5.600688 0.502739 0 -0 -1.566274</pose>
+	</model>
+	<model name='RoomWindow_01_007'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>1.140949 5.600688 0.502739 0 -0 -1.566274</pose>
+	</model>
+	<model name='RoomWindow_01_008'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>-1.199340 5.600688 0.502739 0 -0 -1.566274</pose>
+	</model>
+	<model name='RoomWindow_01_009'>
+        <static>true</static>    
+        <include>
+            <uri>model://aws_robomaker_residential_RoomWindow_01</uri>
+        </include>
+        <pose frame=''>-2.396624 4.387607 0.502739 0 -0 0</pose>
+	</model>
+<!--fin base-->
+
+<!--luces-->
+  <light name='LivingRoom_CeilingLight_0' type='point'>
+      <pose frame=''>-0.0 4.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.32</constant>
+        <linear>0.01</linear>
+        <quadratic>0.03</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>
+    <light name='LivingRoom_CeilingLight_1' type='point'>
+      <pose frame=''>-0.0 0.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>   
+    <light name='LivingRoom_CeilingLight_2' type='point'>
+      <pose frame=''>-0.0 -4.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light> 
+    <light name='LivingRoom_CeilingLight_3' type='point'>
+      <pose frame=''>4.0 4.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.32</constant>
+        <linear>0.01</linear>
+        <quadratic>0.03</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>
+    <light name='LivingRoom_CeilingLight_4' type='point'>
+      <pose frame=''>4.0 0.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>   
+    <light name='LivingRoom_CeilingLight_5' type='point'>
+      <pose frame=''>4.0 -4.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light> 
+
+    <light name='BedRoom_CeilingLight_0' type='point'>
+      <pose frame=''>-8 2.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>  
+    <light name='BedRoom_CeilingLight_1' type='point'>
+      <pose frame=''>-8 -1.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>   
+    <light name='BedRoom_CeilingLight_2' type='point'>
+      <pose frame=''>-8 -4.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light> 
+    <light name='BedRoom_CeilingLight_3' type='point'>
+      <pose frame=''>-4 2.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>  
+    <light name='BedRoom_CeilingLight_4' type='point'>
+      <pose frame=''>-4 -1.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>   
+    <light name='BedRoom_CeilingLight_5' type='point'>
+      <pose frame=''>-4 -4.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light> 
+
+    <light name='Kitchen_CeilingLight_0' type='point'>
+      <pose frame=''>8 2.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>  
+    <light name='Kitchen_CeilingLight_1' type='point'>
+      <pose frame=''>8 -1.0 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>   
+    <light name='Kitchen_CeilingLight_2' type='point'>
+      <pose frame=''>8 -4.5 2.2 0 -0 0</pose>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+      <specular>0.05 0.05 0.05 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.05</constant>
+        <linear>0.01</linear>
+        <quadratic>0.09</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light> 
+<!--fin luces-->
+  </world>
+</sdf>
