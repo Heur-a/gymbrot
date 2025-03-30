@@ -13,7 +13,7 @@ TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
 def generate_launch_description():
     world_file_name = 'world/' + TURTLEBOT3_MODEL + '.model'
     urdf_file_name = 'urdf/turtlebot3_' + TURTLEBOT3_MODEL + '.urdf'
-    pkg_share = FindPackageShare(package='my_world').find('my_world')
+    pkg_share = FindPackageShare(package='gym_world').find('gym_world')
     gazebo_models_path = os.path.join(pkg_share, 'models')
     os.environ["GAZEBO_MODEL_PATH"] = gazebo_models_path
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
