@@ -6,29 +6,30 @@ import yaml
 
 
 def generate_launch_description():
+    # Load waypoints from YAML
     package_dir = get_package_share_directory('point_nav_system')
     yaml_path = os.path.join(package_dir, 'config', 'waypoints.yaml')
-    waypoints = []  # Valor por defecto si falla la carga
 
-    try:
-        with open(yaml_path, 'r') as file:
-            config = yaml.safe_load(file)
-            waypoints = config.get("waypoints", [])
-            if not waypoints:
-                raise ValueError("El fitxer YAML no contiene 'waypoints' o està vacio.")
-    except FileNotFoundError:
-        print(f"Error: No se ha encontrado el fichero YAML a {yaml_path}")
-    except yaml.YAMLError as e:
-        print(f"Error leyendo el YAML: {e}")
-    except Exception as e:
-        print(f"Error inesperado: {e}")
+    # try:
+    #     with open(yaml_path, 'r') as file:
+    #         config = yaml.safe_load(file)
+    #         waypoints = config.get("waypoints", [])
+    #
+    #         # Convert numbers to strings for ROS2 parameter system
+    #         str_waypoints = []
+    #         for wp in waypoints:
+    #             str_waypoints.append([str(val) for val in wp])
+    #
+    #         print(f"✅ Successfully loaded {len(str_waypoints)} waypoints")
+    # except Exception as e:
+    #     print(f"❌ Error loading YAML: {str(e)}")
+    #     str_waypoints = []
 
     return LaunchDescription([
         Node(
-            package="point_nav_system",
-            executable="waypointWebService",
-            name="navigation_node",
-            parameters=[{"waypoints": waypoints}],
-            output="screen",
+            package='point_nav_system',
+            executable='waypointsWebService',
+            name='navigation_node',
+            output='screen',
         ),
     ])

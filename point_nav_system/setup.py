@@ -32,7 +32,8 @@ setup(
     entry_points={
         'console_scripts': [
             'initial_pose_pub = point_nav_system.initial_pose_pub:main',  # añadir
-            'Client_NavigateToPose = point_nav_system.Client_NavigateToPose:main'
+            'Client_NavigateToPose = point_nav_system.Client_NavigateToPose:main',
+            'waypointsWebService= point_nav_system.waypointsWebService:main'
 
         ],
     },
