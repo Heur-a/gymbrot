@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitorizar Actividad - GymBrot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        /* Estilos adicionales si son necesarios */
+        .video-overlay-icon {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <!-- Navbar (reutilizada) -->
+    <nav class="bg-gradient-to-r from-[#F1E1A5] to-[#727272] text-white p-3 md:p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="../assets/logo.png" alt="GymBrot Logo" class="h-14 w-15 md:h-16 md:w-204 object-contain">
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <a href="login.html" class="text-white p-2 md:p-3 rounded-full hover:bg-[#727272]/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 md:w-8 md:h-8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container mx-auto p-3 md:p-4">
+        <button onclick="history.back()" class="mb-4 text-[#727272] hover:text-[#555] transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            <span class="sr-only">Volver</span>
+        </button>
+        <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+
+            <!-- Columna Izquierda: Simulación Cámara/Video -->
+            <div class="w-full md:w-1/2 order-1 md:order-1 flex justify-center items-start">
+                <div class="relative w-full aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
+                    <!-- Simulación de imagen de cámara -->
+                    <img src="../assets/ejercicio_prensa.jpg" alt="Vista de cámara" class="w-full h-full object-cover opacity-80">
+                    
+                    <!-- Overlays simulando interfaz de grabación -->
+                    <div class="absolute top-4 left-4 flex items-center space-x-2 text-white bg-black/50 px-2 py-1 rounded">
+                         <span class="w-3 h-3 bg-red-600 rounded-full inline-block animate-pulse"></span>
+                         <span class="text-sm font-medium">REC</span>
+                    </div>
+                    <div class="absolute top-4 right-4 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 10.5V6.75a4.5 4.5 0 00-4.5-4.5h-1.453a3 3 0 01-2.096-.87l-.14-.141a3 3 0 00-4.24 0L8.203 3.38a3 3 0 01-2.096.87H4.5A4.5 4.5 0 000 6.75v10.5A4.5 4.5 0 004.5 21.75h1.453a3 3 0 012.096.87l.14.141a3 3 0 004.24 0l.141-.14a3 3 0 012.096-.87h1.453A4.5 4.5 0 0021 17.25v-3.75m-10.5 1.5L9 13.5m3 3L15 13.5m-3 3V9m0 0L9 7.5M12 9l3-1.5m-3 1.5V3" />
+                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.375 6.75h1.125a.75.75 0 01.75.75v7.5a.75.75 0 01-.75.75h-1.125"/> 
+                             <rect x="19.5" y="9.75" width="1.5" height="4.5" rx=".75" fill="currentColor"/>
+                        </svg> 
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 video-overlay-icon cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" class="w-8 h-8">
+                             <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+                         </svg>
+                    </div>
+                    <!-- Marco de enfoque -->
+                    <div class="absolute inset-4 border-2 border-white border-dashed opacity-70 pointer-events-none">
+                         <span class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white bg-transparent"></span>
+                         <span class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white bg-transparent"></span>
+                         <span class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white bg-transparent"></span>
+                         <span class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white bg-transparent"></span>
+                         
+                         <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white opacity-50 rounded-sm">
+                              <span class="absolute top-1/2 left-0 -translate-y-1/2 w-2 h-[1px] bg-white"></span>
+                              <span class="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-[1px] bg-white"></span>
+                              <span class="absolute left-1/2 top-0 -translate-x-1/2 w-[1px] h-2 bg-white"></span>
+                              <span class="absolute left-1/2 bottom-0 -translate-x-1/2 w-[1px] h-2 bg-white"></span>
+                         </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Detalles y Comentarios -->
+            <div class="w-full md:w-1/2 order-2 md:order-2 flex flex-col">
+                <h1 class="text-2xl md:text-3xl font-bold text-[#727272] mb-1">Monitorizar actividad</h1>
+                <h2 class="text-lg md:text-xl font-semibold text-gray-600 mb-6">Extensión de cuadricep</h2>
+
+                <!-- Comentarios de Gymbrot -->
+                <div class="bg-gray-100 rounded-xl p-4 md:p-6 mb-8 flex-grow">
+                    <h3 class="text-lg font-semibold text-[#727272] mb-4">Comentarios de Gymbrot</h3>
+                    <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                        <li>Coloca las piernas en grado de 90º</li>
+                        <li>Inclínate</li>
+                        <li>¡Continúa así!</li>
+                        <li>Buen trabajo ya quedan 5 repeticiones</li>
+                        <li>Ejercicio completado, ¡Genial!</li>
+                        <!-- Más comentarios se pueden añadir dinámicamente -->
+                    </ul>
+                </div>
+
+                <!-- Botones de Actividad -->
+                <div class="mt-auto flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div id="timer" class="hidden text-2xl font-bold text-[#727272]">
+                            <span id="minutes">05</span>:<span id="seconds">00</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="pauseButton" class="hidden bg-[#F1E1A5] text-[#727272] p-2 rounded-full hover:bg-[#F1E1A5]/80 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                                </svg>
+                            </button>
+                            <button id="resumeButton" class="hidden bg-[#F1E1A5] text-[#727272] p-2 rounded-full hover:bg-[#F1E1A5]/80 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347c-.75.412-1.667-.13-1.667-.986V5.653Z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 w-full justify-center">
+                        <button id="startActivity" class="bg-[#F1E1A5] text-[#727272] px-8 py-3 rounded-full text-base font-semibold hover:bg-[#F1E1A5]/80 transition-colors shadow-md w-full sm:w-auto">
+                            Comenzar actividad
+                        </button>
+                        <button id="endActivity" disabled class="bg-gray-300 text-gray-500 px-8 py-3 rounded-full text-base font-semibold cursor-not-allowed w-full sm:w-auto">
+                            Terminar actividad
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../js/monitor_activity.js"></script>
+</body>
+</html> 

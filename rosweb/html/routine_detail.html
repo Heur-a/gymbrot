@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Rutina - GymBrot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <!-- Navbar (reutilizada de landing.html) -->
+    <nav class="bg-gradient-to-r from-[#F1E1A5] to-[#727272] text-white p-3 md:p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="../assets/logo.png" alt="GymBrot Logo" class="h-14 w-15 md:h-16 md:w-204 object-contain">
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <a href="login.html" class="text-white p-2 md:p-3 rounded-full hover:bg-[#727272]/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 md:w-8 md:h-8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container mx-auto p-3 md:p-4">
+        <button onclick="history.back()" class="mb-4 text-[#727272] hover:text-[#555] transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            <span class="sr-only">Volver</span>
+        </button>
+        <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+
+            <!-- Columna Izquierda: Mapa (reutilizada de landing.html) -->
+             <div class="w-full md:w-1/2 order-1 md:order-1">
+                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200"> <!-- Fondo gris para simular mapa -->
+                    <div id="markers-container" class="absolute inset-8 md:inset-12">
+                        <!-- Los marcadores se añadirán dinámicamente aquí via landing.js -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Detalles de Rutina -->
+            <div class="w-full md:w-1/2 order-2 md:order-2">
+                <!-- Título de la rutina (estático por ahora) -->
+                <h1 class="text-2xl md:text-4xl font-bold text-[#727272] mb-6 md:mb-8">Rutina de tren superior</h1>
+
+                <div class="space-y-4">
+                    <!-- Tarjeta Ejercicio 1 (basado en la imagen) -->
+                    <div id="exercise-card-1" class="bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent transition-colors duration-300">
+                        <img src="../assets/ejercicio1.jpg" alt="Extensión de cuadricep" class="w-full sm:w-24 h-24 rounded-lg object-cover"> <!-- Asegúrate que la ruta es correcta -->
+                        <div class="flex-1 min-w-0 text-center sm:text-left">
+                            <h3 class="text-lg md:text-xl font-semibold text-[#727272]">Máquina 1</h3>
+                            <p class="text-gray-600 text-xs md:text-sm mb-3">Podrás realizar extensión de cuadricep</p>
+                            <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
+                                <a href="exercise_detail.html">
+                                    <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
+                                        Ver información
+                                    </button>
+                                </a>
+                                <button id="robot-button-1" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-600 transition-colors w-full sm:w-auto">
+                                    Llamar al robot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón Siguiente Actividad -->
+                    <div class="flex justify-center py-2">
+                         <button id="next-activity-button" class="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
+                             Siguiente actividad
+                         </button>
+                    </div>
+
+                    <!-- Tarjeta Ejercicio 2 (basado en la imagen) -->
+                    <div id="exercise-card-2" class="bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent">
+                        <img src="../assets/ejercicio2.jpg" alt="Press de banca" class="w-full sm:w-24 h-24 rounded-lg object-cover"> <!-- Asegúrate que la ruta es correcta -->
+                        <div class="flex-1 min-w-0 text-center sm:text-left">
+                            <h3 class="text-lg md:text-xl font-semibold text-[#727272]">Máquina 2</h3>
+                            <p class="text-gray-600 text-xs md:text-sm mb-3">Podrás realizar press de banca</p>
+                             <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
+                                <a href="exercise_detail.html">
+                                    <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
+                                        Ver información
+                                    </button>
+                                </a>
+                                <button id="robot-button-2" disabled class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors w-full sm:w-auto cursor-not-allowed">
+                                    Llamar al robot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Incluir el JS de landing para los marcadores y el botón de llamada -->
+    <script src="../js/landing.js"></script>
+    <!-- Script específico para la lógica de esta página -->
+    <script src="../js/routine_detail.js"></script>
+
+</body>
+ 
+</html> 
