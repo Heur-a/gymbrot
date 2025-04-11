@@ -1,0 +1,5 @@
+int64 maquina #Numero de la maquina
+
+---
+bool aceptado #Aceptado o no
+string error #Vacio si aceptado
