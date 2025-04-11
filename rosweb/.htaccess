@@ -1,0 +1,13 @@
+Options +FollowSymLinks
+RewriteEngine On
+RewriteBase /gymbrot/
+
+# Permitir acceso a todos los archivos
+<FilesMatch ".*">
+    Require all granted
+</FilesMatch>
+
+# Redirigir a login.html si no se encuentra el archivo
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ login.html [L]
