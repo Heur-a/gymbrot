@@ -18,13 +18,41 @@ function togglePassword() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
+    const emailInput = loginForm.querySelector('input[type="email"]');
+    const passwordInput = loginForm.querySelector('input[type="password"]');
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Evita el envío normal del formulario
-            console.log('Login form submitted. Redirecting to landing.html...');
-            // Redirige a la página landing.html
-            window.location.href = 'landing.html'; // Asume que landing.html está en el mismo directorio
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch('../php/login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Redirigir según el tipo de usuario
+                    if (data.user_type === 1) { // Admin
+                        window.location.href = 'admin.html';
+                    } else { // Usuario normal
+                        window.location.href = 'landing.html';
+                    }
+                } else {
+                    alert(data.message || 'Error en el login');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+            }
         });
     } else {
         console.error('Login form not found!');

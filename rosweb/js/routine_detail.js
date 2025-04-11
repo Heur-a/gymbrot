@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const robotButton2 = document.getElementById('robot-button-2');
 
     let robotTimer;
-    let robotArrivalTime = 15; // 15 segundos
+    let robotArrivalTime = 3; // 15 segundos
 
     function startRobotTimer(button) {
         console.log('Iniciando temporizador para el botón:', button.id);
