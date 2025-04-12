@@ -1,6 +1,7 @@
 import os
 
 import launch.actions
+from launch.actions import ExecuteProcess
 import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -89,4 +90,11 @@ def generate_launch_description():
             name='initial_pose_pub',
             output='screen'
         ),
+        
+        ExecuteProcess(
+            cmd=['ros2', 'service', 'call', '/map_server/load_map', 'nav2_msgs/srv/LoadMap',
+         f'{{map_url: "{map_file}"}}'],
+            output='screen'
+        )
+        
     ])

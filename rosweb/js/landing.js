@@ -17,6 +17,26 @@ function disableCallButton() {
     callButton.classList.remove('bg-[#F1E1A5]', 'text-[#727272]', 'hover:bg-[#F1E1A5]/80');
 }
 
+//Funcion para llamar al robot
+callButton.addEventListener('click', (e) => {
+
+    if(selectedGym === null){
+        alert('No hay gym seleccionado')
+        return
+    }
+
+       switch(selectedGym) {
+        case gyms[0].name:
+            moveToMachine(machine_1.x,machine_1.y)
+            break;
+        case gyms[1].name:
+            moveToMachine(machine_2.x,machine_2.y)
+        case gyms[2].name:
+            moveToMachine(machine_3.x, machine_3.y)
+       }
+
+})
+
 // Datos de los gimnasios
 const gyms = [
     { id: 1, name: 'Máquina 1' },
