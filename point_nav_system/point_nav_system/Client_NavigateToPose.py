@@ -11,6 +11,7 @@ Copyright (c) 2025 Gymbrot Team
 import rclpy
 import math
 from interfaces_gymbrot.msg import LocationGoal
+from interfaces_gymbrot.srv import IrMaquina
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from geometry_msgs.msg import Point, PoseStamped
@@ -33,36 +34,36 @@ class NavigationNode(Node):
         """Initialize the navigation node and its components."""
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
-        self.subscription = self.create_subscription(
-            LocationGoal,
-            '/locationGoal',
-            self.location_goal_callback,
-            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.service = self.create_service(IrMaquina,'/ir_maquina', self.location_goal_callback)
 
         self.current_goal = None
         self.last_sent_goal = None  # Almacena el último objetivo enviado
         self.is_active = False
         self.epsilon = 0.01  # Margen para comparación de coordenadas
 
-    def location_goal_callback(self, msg):
+    def location_goal_callback(self, req, res):
         """Callback for processing incoming navigation goals.
 
                 Args:
                     msg (LocationGoal): Received goal coordinates with x and y positions
                 """
         new_goal = Point()
-        new_goal.x = msg.x
-        new_goal.y = msg.y
+        new_goal.x = req.x
+        new_goal.y = req.y
         new_goal.z = 0.0
 
         # Solo actualizar si es un objetivo nuevo
         if not self._is_same_goal(new_goal, self.current_goal):
             self.current_goal = new_goal
-            self.get_logger().info(f'Nuevo objetivo registrado: X: {msg.x:.2f}, Y: {msg.y:.2f}')
+            self.get_logger().info(f'Nuevo objetivo registrado: X: {req.x:.2f}, Y: {req.y:.2f}')
 
         # Enviar solo si no está activo y es diferente al último enviado
         if not self.is_active and not self._is_same_goal(new_goal, self.last_sent_goal):
             self.send_goal(new_goal)
+
+        res.res = "Bien"
+        res.codigo = 1
+        return res
 
     def send_goal(self, point):
         """Send a navigation goal to the action server.

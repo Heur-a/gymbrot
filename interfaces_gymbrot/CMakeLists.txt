@@ -27,6 +27,7 @@ endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LocationGoal.msg"
+  "srv/IrMaquina.srv"
 )
 
 ament_package()
