@@ -1,0 +1,17 @@
+#Iniciar Camara
+#terminal 1:
+export TURTLEBOT3_MODEL=burger_pi
+echo $TURTLEBOT3_MODEL
+ros2 launch gym_world turtlebot3_my_world.launch.py
+
+
+#terminal 2:
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+
+#terminal 3: lanzamos el servidor de vídeo
+ros2 run web_video_server web_video_server
+
+#terminal 4:
+python3 -m http.server 8000
+
+http://localhost:8000
