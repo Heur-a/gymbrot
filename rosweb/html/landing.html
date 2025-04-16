@@ -14,6 +14,39 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
     <script type="text/javascript" src="../js/ros.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ros2d@0.19.0/build/ros2d.min.js"></script>
+
+    
+
+
+<script>
+  const ros = new ROSLIB.Ros({ url: 'ws://localhost:9090' });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  // Viewer
+  const viewer = new ROS2D.Viewer({
+    divID: 'map',
+    width: 500,
+    height: 500
+  });
+
+  // OccupancyGridClient
+  const gridClient = new ROS2D.OccupancyGridClient({
+    ros: ros,
+    rootObject: viewer.scene,
+    continuous: true
+  });
+
+  // Fit map to viewer
+  gridClient.on('change', function() {
+    viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.height);
+    viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
+  });
+</script>
+
 </head>
 <body class="min-h-screen bg-white">
     <!-- Navbar -->
@@ -85,7 +118,8 @@
 
             <!-- Mapa -->
             <div class="w-full md:w-1/2 order-1 md:order-1">
-                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200"> <!-- Fondo gris para simular mapa -->
+                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200" id="map"> <!-- Fondo gris para simular mapa -->
+                    <img src="../assets/my_map.png" class="w-full h-full">
                     <div id="markers-container" class="absolute inset-8 md:inset-12">
                         <!-- Los marcadores se añadirán dinámicamente aquí -->
                     </div>
