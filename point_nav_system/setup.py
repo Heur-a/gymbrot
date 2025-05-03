@@ -32,7 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             'initial_pose_pub = point_nav_system.initial_pose_pub:main',  # añadir
-            'Client_NavigateToPose = point_nav_system.Client_NavigateToPose:main'
+            'client_navigate_to_pose = point_nav_system.client_navigate_to_pose:main'
 
         ],
     },

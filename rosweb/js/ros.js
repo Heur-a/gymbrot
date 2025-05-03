@@ -26,6 +26,12 @@ let locationGoal = new ROSLIB.Topic({
     messageType: 'interfaces_gymbrot/msg/LocationGoal'
 })
 
+let irMaquina = new ROSLIB.Service({
+    ros: data.ros,
+    name: '/ir_maquina',
+    serviceType: 'interfaces_gymbrot/srv/IrMaquina'
+})
+
 /**
  * Predefined coordinates for machine positions on the map.
  * @type {{x: number, y: number}}
@@ -45,11 +51,19 @@ let machine_3 = { x: -3, y: 2.0 }
  * @param {number} pos_Y - Target Y coordinate.
  */
 function moveToMachine(pos_X, pos_Y) {
-    let message = new ROSLIB.Message({
+    let request = new ROSLIB.ServiceRequest({
         x: pos_X,
         y: pos_Y
     })
-    locationGoal.publish(message)
+    irMaquina.callService(request, (result) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado correctamente")
+    }, (error) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado con errores")
+    })
 }
 
 /**
@@ -79,6 +93,13 @@ function connect() {
         ros: data.ros,
         name: '/locationGoal',
         messageType: 'interfaces_gymbrot/msg/LocationGoal'
+    })
+
+    // Conectar a servicio
+    irMaquina = new ROSLIB.Service({
+        ros: data.ros,
+        name: '/ir_maquina',
+        serviceType: 'interfaces_gymbrot/srv/IrMaquina'
     })
 
     // Connection event handlers
