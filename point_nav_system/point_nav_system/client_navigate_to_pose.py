@@ -10,6 +10,8 @@ Copyright (c) 2025 Gymbrot Team
 
 import rclpy
 import math
+
+from action_msgs.msg import GoalStatus
 from interfaces_gymbrot.msg import LocationGoal
 from interfaces_gymbrot.srv import IrMaquina
 from rclpy.action import ActionClient
@@ -17,6 +19,8 @@ from rclpy.node import Node
 from geometry_msgs.msg import Point, PoseStamped
 from nav2_msgs.action import NavigateToPose
 from rclpy.qos import QoSProfile, ReliabilityPolicy
+
+feedback_period = 0.75
 
 
 class NavigationNode(Node):
@@ -34,7 +38,7 @@ class NavigationNode(Node):
         """Initialize the navigation node and its components."""
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
-        self.service = self.create_service(IrMaquina,'/ir_maquina', self.location_goal_callback)
+        self.service = self.create_service(IrMaquina,'/ir_maquina', self.service_irq_callback)
 
         self.route_points = []
         #TODO: CAMBIAR DE PONER LOS PUNTOS A PELO A QUE LOS RECOJA DE LA BBDD
@@ -86,29 +90,42 @@ class NavigationNode(Node):
         self.send_goal(self.patrol_points[self.current_patrol_goal_key])
         return
 
-    def location_goal_callback(self, req, res):
-        """Callback for processing incoming navigation goals.
+    def service_irq_callback(self, req, res):
+        """Non-blocking service handler with async cancellation
 
-                Args:
-                    msg (LocationGoal): Received goal coordinates with x and y positions
-                """
-        new_goal = Point()
-        new_goal.x = req.x
-        new_goal.y = req.y
-        new_goal.z = 0.0
+        Args:
+            req (IrMaquina.Request): Service request with new coordinates
+            res (IrMaquina.Response): Immediate service response
 
-        # Solo actualizar si es un objetivo nuevo
-        if not self._is_same_goal(new_goal, self.current_goal):
-            self.current_goal = new_goal
-            self.get_logger().info(f'Nuevo objetivo registrado: X: {req.x:.2f}, Y: {req.y:.2f}')
+        Returns:
+            IrMaquina.Response: Status acknowledgement
+        """
+        new_goal = Point(x=req.x, y=req.y, z=0.0)
 
-        # Enviar solo si no está activo y es diferente al último enviado
-        if not self.is_active and not self._is_same_goal(new_goal, self.last_sent_goal):
+        if self._is_same_goal(new_goal, self.current_goal):
+            res.res = "Goal already active"
+            res.codigo = 0
+            return res
+
+        # Store request context for async handling
+        self.pending_req = (req, res)
+        self.current_goal = new_goal
+
+        if self.is_active:
+            self.get_logger().info("Async cancellation initiated")
+            self.goal_handle.cancel_goal_async()
+
+        else:
             self.send_goal(new_goal)
+            res.res = "New goal accepted"
+            res.codigo = 1
 
-        res.res = "Bien"
-        res.codigo = 1
+        # Always return immediately with interim status
+        res.res = "Request processing started"
+        res.codigo = 2
         return res
+
+
 
     def send_goal(self, point):
         """Send a navigation goal to the action server.
@@ -171,43 +188,57 @@ class NavigationNode(Node):
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
-        """Process final result of navigation action."""
-        try:
-            result = future.result()
-            status = result.status
+        """Process final navigation result with proper error handling"""
 
-            # Mostrar feedback final si está disponible
-            if result.feedback:
-                feedback = result.feedback
-                final_pos = feedback.current_pose.pose.position
-                self.get_logger().info(
-                    f'Posición final: X: {final_pos.x:.2f}, Y: {final_pos.y:.2f}\n'
-                    f'Distancia recorrida: {feedback.distance_remaining:.2f}m'
-                )
+        result = future.result().result
+        status = future.result().status
 
-        except Exception as e:
-            self.get_logger().error(f'Error en resultado: {str(e)}')
-        finally:
-            self.is_active = False
-            self.get_logger().info(f'Estado final de navegación: {status}')
-            # Reenviar solo si hay nuevo objetivo diferente
-            # if self.current_goal and not self._is_same_goal(self.current_goal, self.last_sent_goal):
-            #     self.send_goal(self.current_goal)
-            # Volver a la patrullaº
-            self.next_point_controller()
+        self.is_active = False
+
+            # Valid final statuses: SUCCEEDED(4), CANCELED(2), ABORTED(5)
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            # Si llegamos al final del punto, volvemos al bucle
+                self.get_logger().info(f"Navigation succeeded to {self.current_pos.x:.2f},{self.current_pos.y:.2f}")
+                self.next_point_controller()
+        elif status == GoalStatus.STATUS_CANCELED or status == GoalStatus.STATUS_ABORTED:
+            # Si hemos cancelado la accion o se ha abortado
+            # Vamos a la current goal puesta
+            # Esto se debe a que cancelamos la goal cuando llega un punto del servicio
+                self.send_goal(self.current_goal)
+        else:
+                self.get_logger().warning(f"Navigation interrupted: {status}")
+        return
 
     def feedback_callback(self, feedback_msg):
-        """Process ongoing navigation feedback.
+        """Process navigation feedback with rate limiting (0.5Hz).
 
-                Args:
-                    feedback_msg (NavigateToPose.Feedback): Navigation progress feedback
-                """
+        Args:
+            feedback_msg (NavigateToPose.Feedback): Navigation progress feedback
+        """
+        # Rate limiting implementation
+        current_time = self.get_clock().now()
+
+        # Initialize last feedback time on first call
+        if not hasattr(self, 'last_feedback_time'):
+            self.last_feedback_time = current_time
+
+        # Calculate time since last feedback display
+        elapsed_time = (current_time - self.last_feedback_time).nanoseconds * 1e-9
+
+        # Only process if 0.5 seconds have passed since last update
+        if elapsed_time < feedback_period:
+            return
+
+        # Store current time for next rate limit check
+        self.last_feedback_time = current_time
+
+        # Extract and display feedback data
         feedback = feedback_msg.feedback
-        current_pos = feedback.current_pose.pose.position
+        self.current_pos = feedback.current_pose.pose.position
         self.get_logger().info(
-            f'Progreso: X: {current_pos.x:.2f}, Y: {current_pos.y:.2f} | '
-            f'Distancia restante: {feedback.distance_remaining:.2f}m | '
-            f'Tiempo navegación: {feedback.navigation_time.sec}s'
+            f'Progress: X: {self.current_pos.x:.2f}, Y: {self.current_pos.y:.2f} | '
+            f'Remaining: {feedback.distance_remaining:.2f}m | '
+            f'Duration: {feedback.navigation_time.sec}s'
         )
 
 
