@@ -36,10 +36,55 @@ class NavigationNode(Node):
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
         self.service = self.create_service(IrMaquina,'/ir_maquina', self.location_goal_callback)
 
-        self.current_goal = None
+        self.route_points = []
+        #TODO: CAMBIAR DE PONER LOS PUNTOS A PELO A QUE LOS RECOJA DE LA BBDD
+        self.patrol_points = {
+            "PESAS1": Point(x=-4.0, y=-3.5, z=0.0),
+            "PESAS2": Point(x=-4.0, y=-0.5, z=0.0),
+            "PESAS3": Point(x=-4.0, y=2.5, z=0.0),
+            "PESAS4": Point(x=1.5, y=4.0, z=0.0),
+            "PESAS5": Point(x=5.0, y=4.0, z=0.0),
+        }
+
+        # GUARDAMOS LA CLAVE DEL PUNTO QUE SIGUE EN LA RUTA DE PATRULLA
+        self.current_patrol_goal_key = list(self.patrol_points.keys())[0]
+
+        self.current_goal = self.patrol_points[self.current_patrol_goal_key]
         self.last_sent_goal = None  # Almacena el último objetivo enviado
         self.is_active = False
         self.epsilon = 0.01  # Margen para comparación de coordenadas
+
+        # Empezar bucle
+        self.send_goal(self.current_goal)
+
+    def next_point_controller(self):
+        """
+        Actualiza y/o devuelve el robot a su patrulla normal
+        :return:
+        """
+        # Si hemos llegado al punto de patrulla,
+        # Hay que ir al siguiente
+        if (self._is_same_goal(self.current_goal, self.patrol_points[self.current_patrol_goal_key])):
+            # Pasamos la clave del punto a index
+            # Para poder hacer aritmetica
+            # Y asignarle el siguiente punto
+            current_patrol_index = list(self.patrol_points.keys()).index(self.current_patrol_goal_key)
+
+            # Avanzamos al siguiente punto, en bucle
+            next_patrol_index = (current_patrol_index + 1) % len(self.patrol_points)
+
+            # Convertimos el index otra vez en key
+            # Para poder buscar el punto en el diccionario
+            self.current_patrol_goal_key = list(self.patrol_points.keys())[next_patrol_index]
+
+            #Avisar de cambio a siguiente punto
+            self.get_logger().info("Ruta a siguiente punto de patrulla actualizado")
+
+        # Si hemos llegado se envia con el goal de patrulla actualizado
+        # Sino, con el ultimo establecido
+        self.get_logger().info("Siguiente punto, robot yendo a " + self.current_patrol_goal_key)
+        self.send_goal(self.patrol_points[self.current_patrol_goal_key])
+        return
 
     def location_goal_callback(self, req, res):
         """Callback for processing incoming navigation goals.
@@ -74,9 +119,9 @@ class NavigationNode(Node):
                 Raises:
                     RuntimeError: If action server is unavailable
                 """
-        if self._is_same_goal(point, self.last_sent_goal):
-            self.get_logger().info('Objetivo idéntico al anterior, ignorando...')
-            return
+        # if self._is_same_goal(point, self.last_sent_goal):
+        #     self.get_logger().info('Objetivo idéntico al anterior, ignorando...')
+        #     return
 
         goal_msg = NavigateToPose.Goal()
         goal_msg.pose = PoseStamped()
@@ -89,6 +134,7 @@ class NavigationNode(Node):
         self.get_logger().info(f'Enviando nuevo objetivo: X: {point.x:.2f}, Y: {point.y:.2f}')
         self.is_active = True
         self.last_sent_goal = point  # Actualizar último objetivo enviado
+        self.current_goal = point
 
         self._send_goal_future = self._action_client.send_goal_async(
             goal_msg,
@@ -145,8 +191,10 @@ class NavigationNode(Node):
             self.is_active = False
             self.get_logger().info(f'Estado final de navegación: {status}')
             # Reenviar solo si hay nuevo objetivo diferente
-            if self.current_goal and not self._is_same_goal(self.current_goal, self.last_sent_goal):
-                self.send_goal(self.current_goal)
+            # if self.current_goal and not self._is_same_goal(self.current_goal, self.last_sent_goal):
+            #     self.send_goal(self.current_goal)
+            # Volver a la patrullaº
+            self.next_point_controller()
 
     def feedback_callback(self, feedback_msg):
         """Process ongoing navigation feedback.
