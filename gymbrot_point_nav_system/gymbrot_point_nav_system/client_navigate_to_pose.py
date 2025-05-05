@@ -13,7 +13,7 @@ import math
 
 from action_msgs.msg import GoalStatus
 from interfaces_gymbrot.msg import LocationGoal
-from interfaces_gymbrot.srv import IrMaquina
+from gymbrot_interfaces.srv import IrMaquina
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from geometry_msgs.msg import Point, PoseStamped

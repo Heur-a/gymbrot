@@ -3,7 +3,7 @@ from glob import glob
 
 from setuptools import setup
 
-package_name = 'point_nav_system'
+package_name = 'gymbrot_point_nav_system'
 
 setup(
     name=package_name,
@@ -31,8 +31,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'initial_pose_pub = point_nav_system.initial_pose_pub:main',  # añadir
-            'client_navigate_to_pose = point_nav_system.client_navigate_to_pose:main'
+            'initial_pose_pub = gymbrot_point_nav_system.initial_pose_pub:main',  # añadir
+            'client_navigate_to_pose = gymbrot_point_nav_system.client_navigate_to_pose:main'
 
         ],
     },
