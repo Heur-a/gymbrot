@@ -29,6 +29,7 @@ setup(
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
+    test_suite='test',
     entry_points={
         'console_scripts': [
             'initial_pose_pub = gymbrot_point_nav_system.initial_pose_pub:main',  # añadir
