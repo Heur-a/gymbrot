@@ -13,8 +13,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
-    <script type="text/javascript" src="../js/ros.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ros2d@0.19.0/build/ros2d.min.js"></script>
+    <script type="text/javascript" src="../js/ros.js"></script>
+
 
     
 
@@ -119,7 +121,7 @@
             <!-- Mapa -->
             <div class="w-full md:w-1/2 order-1 md:order-1">
                 <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200" id="map"> <!-- Fondo gris para simular mapa -->
-                    <img src="../assets/my_map.png" class="w-full h-full">
+                    <canvas id="mapCanvas" src="../assets/my_map.png" class="w-full h-full">
                     <div id="markers-container" class="absolute inset-8 md:inset-12">
                         <!-- Los marcadores se añadirán dinámicamente aquí -->
                     </div>
