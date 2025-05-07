@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'capture_image'
+package_name = 'gymbrot_capture_image'
 
 setup(
     name=package_name,
