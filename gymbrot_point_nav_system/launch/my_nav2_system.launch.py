@@ -8,9 +8,9 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    nav2_yaml = os.path.join(get_package_share_directory('point_nav_system'), 'config', 'my_nav2_params.yaml')
-    map_file = os.path.join(get_package_share_directory('point_nav_system'), 'config', 'mapa_real.yaml')
-    rviz_config_dir = os.path.join(get_package_share_directory('point_nav_system'), 'config', 'my_slam.rviz')
+    nav2_yaml = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'my_nav2_params.yaml')
+    map_file = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'gym_map_new.yaml')
+    rviz_config_dir = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'my_slam.rviz')
 
     return LaunchDescription([
         Node(

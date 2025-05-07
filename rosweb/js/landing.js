@@ -244,7 +244,9 @@ function changePage(direction) {
 // Función para filtrar la página actual
 function filterCurrentPage() {
     const searchInput = document.getElementById('exerciseSearch'); // Usar el ID correcto del input
-    if (!searchInput) return; // Salir si el input no existe
+    if (!searchInput) {
+      return;
+    } // Salir si el input no existe
     
     const searchTerm = searchInput.value.toLowerCase();
     const cards = document.querySelectorAll('#pageContent .filterable-card');

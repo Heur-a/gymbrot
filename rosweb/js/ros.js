@@ -16,6 +16,18 @@ data = {
     connected: false
 }
 
+// DATOS DEL MAPA 
+// Código de ayuda para cargar canvas y marcar robot en el mapa
+// Cargar metadatos del mapa
+const mapYamlUrl = '../assets/gym_map_new.yaml'; // poner ubicación
+const mapImageUrl = '../assets/gym_map_new.png'; // poner ubicación
+
+let mapInfo = null;
+let canvas
+let ctx
+let image = new Image();
+let robotPosition = { x: 0, y: 0 };
+
 /**
  * Publisher for sending location goals to the robot.
  * @type {ROSLIB.Topic}
@@ -24,6 +36,12 @@ let locationGoal = new ROSLIB.Topic({
     ros: data.ros,
     name: '/locationGoal',
     messageType: 'interfaces_gymbrot/msg/LocationGoal'
+})
+
+let irMaquina = new ROSLIB.Service({
+    ros: data.ros,
+    name: '/ir_maquina',
+    serviceType: 'interfaces_gymbrot/srv/IrMaquina'
 })
 
 /**
@@ -45,18 +63,26 @@ let machine_3 = { x: -3, y: 2.0 }
  * @param {number} pos_Y - Target Y coordinate.
  */
 function moveToMachine(pos_X, pos_Y) {
-    let message = new ROSLIB.Message({
+    let request = new ROSLIB.ServiceRequest({
         x: pos_X,
         y: pos_Y
     })
-    locationGoal.publish(message)
+    irMaquina.callService(request, (result) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado correctamente")
+    }, (error) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado con errores")
+    })
 }
 
 /**
  * Initializes a ROS connection, subscribes to `/odom`,
  * and sets up connection, error, and disconnection callbacks.
  */
-function connect() {
+async function connect() {
     data.ros = new ROSLIB.Ros({
         url: data.rosbridge_address
     })
@@ -67,11 +93,15 @@ function connect() {
         messageType: 'nav_msgs/msg/Odometry'
     })
 
+    // Load map things
+    canvas = document.getElementById("mapCanvas");
+    ctx = canvas.getContext("2d");
+    loadmap()
+
     odom.subscribe((message) => {
-        // Example code for accessing odometry position (currently commented)
-        // data.position = message.pose.pose.position
-        // document.getElementById("pos_x").innerHTML = data.position.x.toFixed(2)
-        // document.getElementById("pos_y").innerHTML = data.position.y.toFixed(2)
+           robotPosition.x = message.pose.pose.position.x;
+           robotPosition.y = message.pose.pose.position.y;
+           draw();  // redibuja mapa + posición del robot
     })
 
     // Re-create the locationGoal publisher with the active ROS connection
@@ -79,6 +109,13 @@ function connect() {
         ros: data.ros,
         name: '/locationGoal',
         messageType: 'interfaces_gymbrot/msg/LocationGoal'
+    })
+
+    // Conectar a servicio
+    irMaquina = new ROSLIB.Service({
+        ros: data.ros,
+        name: '/ir_maquina',
+        serviceType: 'interfaces_gymbrot/srv/IrMaquina'
     })
 
     // Connection event handlers
@@ -167,3 +204,54 @@ document.addEventListener('DOMContentLoaded', event => {
     }
 
 })
+
+/**
+ * Loads map metadata from a YAML file and displays the map image on the canvas.
+ * This function fetches map information, updates the global mapInfo, and draws the image when loaded.
+ *
+ * @param {HTMLImageElement} image - The image element to display the map.
+ * @param {string} mapYamlUrl - The URL of the map YAML metadata file.
+ * @param {HTMLCanvasElement} canvas - The canvas element to draw the map on.
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context for the canvas.
+ */
+async function loadmap() {
+    fetch(mapYamlUrl)
+        .then(response => response.text())
+        .then(yamlText => {
+            const doc = jsyaml.load(yamlText);
+            mapInfo = doc;
+            image.src = mapImageUrl;
+        });
+
+    image.onload = () => {
+        canvas.width = image.width
+        canvas.height = image.height
+        ctx.drawImage(image, 0, 0);
+
+    }
+}
+
+// Función para redibujar mapa y robot
+function draw() {
+    if (!mapInfo || !image.complete) {
+        return;
+    }
+
+    // Redibujar el mapa
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0);
+
+    // Transformar coordenadas ROS -> imagen
+    const res = mapInfo.resolution;
+    const { origin } = mapInfo;
+
+    // Transformar odom -> pixeles
+    let pixelX = (robotPosition.x - origin[0]) / res;
+    let pixelY = canvas.height - ((robotPosition.y - origin[1]) / res); // invertido en Y
+
+    // Dibujar robot
+    ctx.beginPath();
+    ctx.fillStyle = 'green';
+    ctx.arc(pixelX, pixelY, 5, 0, 2 * Math.PI);
+    ctx.fill();
+}
