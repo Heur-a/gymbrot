@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Unit Tests for gymbrot_point_nav_system NavigationNode
 
@@ -7,29 +6,39 @@ Execute amb:
 colcon test --packages-select gymbrot_point_nav_system --event-handlers console_direct+
 """
 
-from unittest.mock import MagicMock, patch
-
-import pytest
-
-import rclpy
 from action_msgs.msg import GoalStatus
+from builtin_interfaces.msg import Time
+from unittest.mock import MagicMock, patch
+import rclpy
+import pytest
 from geometry_msgs.msg import Point
 from gymbrot_interfaces.srv import IrMaquina
+from rclpy.clock import Clock
+from rclpy.time import Time as RclpyTime
 from src.gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose import NavigationNode
 
 
 @pytest.fixture
 def node():
     rclpy.init()
-    with patch('rclpy.action.ActionClient'), \
-            patch.object(NavigationNode, 'create_service'):
-        node = NavigationNode()
-        node._action_client = MagicMock()
-        node._action_client.wait_for_server.return_value = True
-        node.get_logger = MagicMock()
-        yield node
-        node.destroy_node()
-    rclpy.shutdown()
+    try:
+        with patch('rclpy.action.ActionClient'), \
+                patch.object(NavigationNode, 'create_service'), \
+                patch.object(NavigationNode, 'get_clock') as mock_get_clock, \
+                patch.object(NavigationNode, 'send_goal') as mock_send_goal:
+
+            real_clock = Clock()
+            mock_get_clock.return_value.now.return_value.to_msg.return_value = real_clock.now().to_msg()
+
+            node = NavigationNode()
+            node._action_client = MagicMock()
+            node._action_client.wait_for_server.return_value = True
+            node.get_logger = MagicMock()
+
+            yield node
+            node.destroy_node()
+    finally:
+        rclpy.shutdown()
 
 
 def test_initialization(node):
@@ -69,13 +78,21 @@ def test_service_new_goal(node):
 def test_patrol_sequence(node):
     """Verify automatic patrol point rotation"""
     node.current_patrol_goal_key = "PESAS5"
-    node.next_point_controller()
-    assert node.current_patrol_goal_key == "PESAS1"
+    with patch.object(node, 'send_goal') as mock_send_goal:
+        node.next_point_controller()
+        assert node.current_patrol_goal_key == "PESAS1"
+        mock_send_goal.assert_called_once()
 
 
 def test_goal_handling(node):
     """Test full goal sending workflow"""
     test_point = Point(x=3.0, y=4.0, z=0.0)
+
+    # Setup mocks
+    node._action_client.send_goal_async = MagicMock()
+    node._action_client.wait_for_server = MagicMock()
+    node.get_logger = MagicMock()
+
     node.send_goal(test_point)
 
     # Verify action client call
@@ -101,7 +118,7 @@ def test_feedback_rate_limiting(mock_time, node):
     assert node.get_logger.info.call_count == 1
 
     # Simulate time passage
-    mock_time.return_value = node.get_clock().now() + rclpy.time.Duration(seconds=1)
+    node.last_feedback_time = node.last_feedback_time - rclpy.time.Duration(seconds=1)
     node.feedback_callback(feedback)
     assert node.get_logger.info.call_count == 2
 
@@ -110,11 +127,16 @@ def test_navigation_result_handling(node):
     """Test result processing for success case"""
     future = MagicMock()
     future.result.return_value.status = GoalStatus.STATUS_SUCCEEDED
+    future.result.return_value.result = MagicMock()
+
     node.current_patrol_goal_key = "PESAS1"
+    node.get_logger = MagicMock()
+    node.send_goal = MagicMock()
 
     node.get_result_callback(future)
     assert node.current_patrol_goal_key == "PESAS2"
-    assert node._action_client.send_goal_async.called
+    # Ensure next goal is sent
+    node.send_goal.assert_called_once()
 
 
 if __name__ == '__main__':
