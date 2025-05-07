@@ -39,77 +39,186 @@
         </button>
         <div class="flex flex-col md:flex-row gap-4 md:gap-8">
 
-            <!-- Columna Izquierda: Mapa (reutilizada de landing.html) -->
-             <div class="w-full md:w-1/2 order-1 md:order-1">
-                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200"> <!-- Fondo gris para simular mapa -->
+            <!-- Columna Izquierda: Mapa -->
+            <div class="w-full md:w-1/2 order-1 md:order-1">
+                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200">
                     <div id="markers-container" class="absolute inset-8 md:inset-12">
-                        <!-- Los marcadores se añadirán dinámicamente aquí via landing.js -->
+                        <!-- Los marcadores se añadirán dinámicamente aquí -->
                     </div>
                 </div>
             </div>
 
             <!-- Columna Derecha: Detalles de Rutina -->
             <div class="w-full md:w-1/2 order-2 md:order-2">
-                <!-- Título de la rutina (estático por ahora) -->
-                <h1 class="text-2xl md:text-4xl font-bold text-[#727272] mb-6 md:mb-8">Rutina de tren superior</h1>
+                <!-- Título de la rutina -->
+                <h1 id="routineTitle" class="text-2xl md:text-4xl font-bold text-[#727272] mb-6 md:mb-8"></h1>
 
-                <div class="space-y-4">
-                    <!-- Tarjeta Ejercicio 1 (basado en la imagen) -->
-                    <div id="exercise-card-1" class="bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent transition-colors duration-300">
-                        <img src="../assets/ejercicio1.jpg" alt="Extensión de cuadricep" class="w-full sm:w-24 h-24 rounded-lg object-cover"> <!-- Asegúrate que la ruta es correcta -->
-                        <div class="flex-1 min-w-0 text-center sm:text-left">
-                            <h3 class="text-lg md:text-xl font-semibold text-[#727272]">Máquina 1</h3>
-                            <p class="text-gray-600 text-xs md:text-sm mb-3">Podrás realizar extensión de cuadricep</p>
-                            <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
-                                <a href="exercise_detail.html">
-                                    <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
-                                        Ver información
-                                    </button>
-                                </a>
-                                <button id="robot-button-1" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-600 transition-colors w-full sm:w-auto">
-                                    Llamar al robot
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botón Siguiente Actividad -->
-                    <div class="flex justify-center py-2">
-                         <button id="next-activity-button" class="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
-                             Siguiente actividad
-                         </button>
-                    </div>
-
-                    <!-- Tarjeta Ejercicio 2 (basado en la imagen) -->
-                    <div id="exercise-card-2" class="bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent">
-                        <img src="../assets/ejercicio2.jpg" alt="Press de banca" class="w-full sm:w-24 h-24 rounded-lg object-cover"> <!-- Asegúrate que la ruta es correcta -->
-                        <div class="flex-1 min-w-0 text-center sm:text-left">
-                            <h3 class="text-lg md:text-xl font-semibold text-[#727272]">Máquina 2</h3>
-                            <p class="text-gray-600 text-xs md:text-sm mb-3">Podrás realizar press de banca</p>
-                             <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
-                                <a href="exercise_detail.html">
-                                    <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
-                                        Ver información
-                                    </button>
-                                </a>
-                                <button id="robot-button-2" disabled class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors w-full sm:w-auto cursor-not-allowed">
-                                    Llamar al robot
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
+                <div id="exercisesContainer" class="space-y-4">
+                    <!-- Los ejercicios se cargarán dinámicamente aquí -->
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- Incluir el JS de landing para los marcadores y el botón de llamada -->
-    <script src="../js/landing.js"></script>
-    <!-- Script específico para la lógica de esta página -->
-    <script src="../js/routine_detail.js"></script>
+    <!-- Template para las tarjetas de ejercicio -->
+    <template id="exerciseCardTemplate">
+        <div class="exercise-card bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent transition-colors duration-300">
+            <img src="" alt="" class="w-full sm:w-24 h-24 rounded-lg object-cover">
+            <div class="flex-1 min-w-0 text-center sm:text-left">
+                <h3 class="machine-name text-lg md:text-xl font-semibold text-[#727272]"></h3>
+                <p class="exercise-description text-gray-600 text-xs md:text-sm mb-3"></p>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
+                    <a href="exercise_detail.html" class="exercise-detail-link">
+                        <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
+                            Ver información
+                        </button>
+                    </a>
+                    <button class="robot-button bg-gray-500 text-white px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-600 transition-colors w-full sm:w-auto">
+                        Llamar al robot
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 
+    <!-- Script específico para la lógica de esta página -->
+    <script>
+        let robotTimer;
+        let robotArrivalTime = 3; // 3 segundos
+
+        function startRobotTimer(button) {
+            console.log('Iniciando temporizador para el botón:', button.id);
+            button.disabled = true;
+            button.innerHTML = 'El robot está de camino';
+            button.classList.remove('bg-gray-500', 'text-white', 'hover:bg-gray-600');
+            button.classList.add('bg-yellow-500', 'text-white', 'cursor-not-allowed');
+
+            robotTimer = setInterval(() => {
+                robotArrivalTime--;
+                console.log('Tiempo restante:', robotArrivalTime);
+                
+                if (robotArrivalTime <= 0) {
+                    clearInterval(robotTimer);
+                    button.innerHTML = 'Monitorizar';
+                    button.disabled = false;
+                    button.classList.remove('bg-yellow-500', 'cursor-not-allowed');
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                    
+                    button.addEventListener('click', () => {
+                        window.location.href = 'monitor_activity.html';
+                    });
+                }
+            }, 1000);
+        }
+
+        // Función para obtener el ID de la rutina de la URL
+        function getRoutineId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Función para cargar los detalles de la rutina
+        async function loadRoutineDetails() {
+            const routineId = getRoutineId();
+            if (!routineId) {
+                alert('ID de rutina no proporcionado');
+                return;
+            }
+
+            try {
+                const response = await fetch(`../php/get_routine_detail.php?id=${routineId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Actualizar el título de la página
+                document.title = `${data.name} - GymBrot`;
+                document.getElementById('routineTitle').textContent = data.name;
+
+                // Contenedor de ejercicios
+                const exercisesContainer = document.getElementById('exercisesContainer');
+                exercisesContainer.innerHTML = '';
+
+                // Crear las tarjetas de ejercicio
+                data.exercises.forEach((exercise, index) => {
+                    const template = document.getElementById('exerciseCardTemplate');
+                    const card = template.content.cloneNode(true);
+
+                    // Configurar la tarjeta
+                    const exerciseCard = card.querySelector('.exercise-card');
+                    exerciseCard.id = `exercise-card-${index + 1}`;
+
+                    // Configurar la imagen
+                    const img = card.querySelector('img');
+                    img.src = exercise.image || '../assets/ejercicio_prensa.jpg';
+                    img.alt = exercise.name;
+
+                    // Configurar el nombre de la máquina
+                    const machineName = card.querySelector('.machine-name');
+                    machineName.textContent = exercise.machine.name;
+
+                    // Configurar la descripción
+                    const description = card.querySelector('.exercise-description');
+                    description.textContent = `Podrás realizar ${exercise.name}`;
+
+                    // Configurar el enlace de detalle
+                    const detailLink = card.querySelector('.exercise-detail-link');
+                    detailLink.href = `exercise_detail.html?id=${exercise.id}`;
+
+                    // Configurar el botón del robot
+                    const robotButton = card.querySelector('.robot-button');
+                    robotButton.id = `robot-button-${index + 1}`;
+                    if (index > 0) {
+                        robotButton.disabled = true;
+                        robotButton.classList.remove('bg-gray-500', 'text-white', 'hover:bg-gray-600');
+                        robotButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    }
+                    robotButton.addEventListener('click', () => startRobotTimer(robotButton));
+
+                    // Añadir la tarjeta al contenedor
+                    exercisesContainer.appendChild(card);
+
+                    // Añadir botón "Siguiente actividad" entre ejercicios
+                    if (index < data.exercises.length - 1) {
+                        const nextButtonContainer = document.createElement('div');
+                        nextButtonContainer.className = 'flex justify-center py-2';
+                        nextButtonContainer.innerHTML = `
+                            <button class="next-activity-button bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
+                                Siguiente actividad
+                            </button>
+                        `;
+                        exercisesContainer.appendChild(nextButtonContainer);
+
+                        // Configurar el botón "Siguiente actividad"
+                        const nextButton = nextButtonContainer.querySelector('.next-activity-button');
+                        nextButton.addEventListener('click', () => {
+                            exerciseCard.style.backgroundColor = '#4CAF50';
+                            exerciseCard.classList.add('completed');
+
+                            const nextRobotButton = document.getElementById(`robot-button-${index + 2}`);
+                            if (nextRobotButton) {
+                                nextRobotButton.disabled = false;
+                                nextRobotButton.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                                nextRobotButton.classList.add('bg-gray-500', 'text-white', 'hover:bg-gray-600');
+                            }
+
+                            nextButton.disabled = true;
+                            nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error al cargar los detalles de la rutina:', error);
+                alert('Error al cargar los detalles de la rutina');
+            }
+        }
+
+        // Cargar los detalles cuando la página se cargue
+        document.addEventListener('DOMContentLoaded', loadRoutineDetails);
+    </script>
 </body>
- 
 </html> 

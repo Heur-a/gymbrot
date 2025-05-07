@@ -6,49 +6,41 @@
     <title>GymBrot - Tu Asistente de Gimnasio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/easeljs@1/lib/easeljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ros2d@0.10.0/build/ros2d.min.js"></script>
+    <script src="static/js/draw_occupancy_grid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
         body { font-family: 'Montserrat', sans-serif; }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #F1E1A5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
-    <!-- Leaflet CSS y JS para el mapa -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ros2d@0.19.0/build/ros2d.min.js"></script>
-    <script type="text/javascript" src="../js/ros.js"></script>
-
-
+        <!-- Leaflet CSS y JS para el mapa -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ros2d@0.19.0/build/ros2d.min.js"></script>
+        <script type="text/javascript" src="../js/ros.js"></script>
     
-
-
-<script>
-  const ros = new ROSLIB.Ros({ url: 'ws://localhost:9090' });
-
-  ros.on('connection', function() {
-    console.log('Connected to websocket server.');
-  });
-
-  // Viewer
-  const viewer = new ROS2D.Viewer({
-    divID: 'map',
-    width: 500,
-    height: 500
-  });
-
-  // OccupancyGridClient
-  const gridClient = new ROS2D.OccupancyGridClient({
-    ros: ros,
-    rootObject: viewer.scene,
-    continuous: true
-  });
-
-  // Fit map to viewer
-  gridClient.on('change', function() {
-    viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.height);
-    viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
-  });
-</script>
-
 </head>
 <body class="min-h-screen bg-white">
     <!-- Navbar -->
@@ -78,24 +70,20 @@
             <span class="sr-only">Volver</span>
         </button>
         <div class="flex flex-col md:flex-row gap-4 md:gap-8">
-            <!-- Panel de Ejercicios (Movido arriba en móvil) -->
+            <!-- Panel de Ejercicios -->
             <div class="w-full md:w-1/2 order-2 md:order-2">
                 <h1 class="text-2xl md:text-4xl font-bold text-[#727272] mb-4 md:mb-8">Motívate con GymBrot</h1>
                 
                 <!-- Tabs/Paginador -->
                 <div class="flex items-center justify-center space-x-6 mb-6">
-                    
                     <div class="flex space-x-8 border-b border-gray-200">
                         <button onclick="changePage(0)" class="page-tab pb-2 px-1 text-[#727272] font-medium text-sm md:text-base transition-all border-b-2 border-transparent" data-page="0">EJERCICIOS</button>
                         <button onclick="changePage(1)" class="page-tab pb-2 px-1 text-gray-400 font-medium text-sm md:text-base transition-all border-b-2 border-transparent" data-page="1">RUTINAS</button>
-                        <button onclick="changePage(2)" class="page-tab pb-2 px-1 text-gray-400 font-medium text-sm md:text-base transition-all border-b-2 border-transparent" data-page="2">MÁQUINAS</button>
                     </div>
-                    
                 </div>
 
-                <!-- Contenido de las páginas -->
-                <!-- Buscador (movido fuera de pageContent) -->
-                <div id="searchContainer" class="mb-6 ">
+                <!-- Buscador -->
+                <div id="searchContainer" class="mb-6">
                     <div class="relative">
                         <input type="text" 
                                id="exerciseSearch" 
@@ -113,15 +101,18 @@
                     </div>
                 </div>
                 
+                <!-- Contenido de las páginas -->
                 <div id="pageContent">
-                    <!-- El contenido se cargará dinámicamente aquí -->
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- Mapa -->
             <div class="w-full md:w-1/2 order-1 md:order-1">
-                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200" id="map"> <!-- Fondo gris para simular mapa -->
-                    <canvas id="mapCanvas" src="../assets/my_map.png" class="w-full h-full">
+                <canvas id="mapCanvas" src="../assets/my_map.png" class="w-full h-full">
+                    <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-none">
                     <div id="markers-container" class="absolute inset-8 md:inset-12">
                         <!-- Los marcadores se añadirán dinámicamente aquí -->
                     </div>
