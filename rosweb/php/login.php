@@ -1,54 +1,78 @@
 <?php
+// 1. Iniciar sesión lo primero
+session_start();
+
+// 2. Evitar que cualquier warning/notice rompa el JSON
+ini_set('display_errors', 0);
+error_reporting(0);
+
+// 3. Cabeceras CORS y JSON
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Incluir archivo de configuración
-require_once 'config.php';
-
-// Obtener conexión
+// 4. Carga la configuración y obtiene la conexión
+require_once __DIR__ . '/config.php';
 $conn = getDBConnection();
 
-// Obtener datos del POST
-$data = json_decode(file_get_contents('php://input'), true);
-$email = $data['email'] ?? '';
-$password = $data['password'] ?? '';
+// 5. Leer el JSON entrante
+$payload  = file_get_contents('php://input');
+$data     = json_decode($payload, true);
+$email    = trim($data['email']    ?? '');
+$password = trim($data['password'] ?? '');
 
-if (empty($email) || empty($password)) {
-    echo json_encode(['success' => false, 'message' => 'Email y contraseña son requeridos']);
+// 6. Validaciones básicas
+if ($email === '' || $password === '') {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Email y contraseña son requeridos'
+    ]);
     exit;
 }
 
-// Preparar y ejecutar la consulta
-$stmt = $conn->prepare("SELECT id, password, user_type FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
+// 7. Buscar al usuario
+$stmt = $conn->prepare("
+    SELECT id, password, user_type
+      FROM users
+     WHERE email = ?
+    LIMIT 1
+");
+$stmt->bind_param('s', $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Usuario no encontrado'
+    ]);
     exit;
 }
 
 $user = $result->fetch_assoc();
 
-// Verificar la contraseña
+// 8. Verificar contraseña (aquí a futuro cambia a password_verify si la guardas hasheada)
 if ($password === $user['password']) {
-    // Iniciar sesión
-    session_start();
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['user_type'] = $user['user_type'];
-    
+    // 9. Éxito: almacenar datos de sesión
+    $_SESSION['user_id']   = (int)$user['id'];
+    $_SESSION['user_type'] = (int)$user['user_type'];
+
     echo json_encode([
-        'success' => true,
-        'message' => 'Login exitoso',
-        'user_type' => $user['user_type']
+        'success'   => true,
+        'message'   => 'Login exitoso',
+        'user_type' => $_SESSION['user_type']
     ]);
+    exit;
 } else {
-    echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta']);
+    // 10. Contraseña incorrecta
+    echo json_encode([
+        'success' => false,
+        'message' => 'Contraseña incorrecta'
+    ]);
+    exit;
 }
 
+// 11. Cerrar recursos (nunca se alcanza porque todos los caminos hacen exit)
 $stmt->close();
 closeDBConnection($conn);
-?> 
