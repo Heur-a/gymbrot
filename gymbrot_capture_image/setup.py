@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [ 
-            'capture_image=capture_image.capturar:main'
+            'capture_image=gymbrot_capture_image.capturar:main',
+            'webcam_publisher = gymbrot_capture_image.webcam_publisher:main'
         ],
     },
 )
