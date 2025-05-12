@@ -160,8 +160,8 @@ controller_server_rclcpp_node:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 0.5
-      publish_frequency: 0.3
+      update_frequency: 0.75
+      publish_frequency: 0.6
       global_frame: odom
       robot_base_frame: base_link
       use_sim_time: False
@@ -204,8 +204,8 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 0.5            # Menys càlcul
-      publish_frequency: 0.5           # Menys publicació
+      update_frequency: 0.75            # Menys càlcul
+      publish_frequency: 0.6         # Menys publicació
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False

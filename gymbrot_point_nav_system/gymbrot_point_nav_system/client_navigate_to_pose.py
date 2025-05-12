@@ -40,13 +40,14 @@ class NavigationNode(Node):
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
         self.service = self.create_service(IrMaquina,'/ir_maquina', self.service_irq_callback)
 
+        self.declare_parameter('robot_real',False)
+
         # Parametro si es imulacion o no
-        self.declare_parameter('use_sim_time', True)
-        self.sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
+        self.sim_time = self.get_parameter('robot_real').get_parameter_value().bool_value
 
         self.route_points = []
         #TODO: CAMBIAR DE PONER LOS PUNTOS A PELO A QUE LOS RECOJA DE LA BBDD
-        if self.sim_time:
+        if self.sim_time is False:
             self.patrol_points = {
                 "PESAS1": Point(x=-4.0, y=-3.5, z=0.0),
                 "PESAS2": Point(x=-4.0, y=-0.5, z=0.0),
@@ -56,8 +57,9 @@ class NavigationNode(Node):
             }
         else:
             self.patrol_points = {
-                "ESQUINA1": Point(x=0.65,y=-0.56,z=0),
-                "ESQUINA2": Point(x=0.74,y=0.46)
+                "ESQUINA2": Point(x=0.5, y=0.4, z=0.0),
+                "ESQUINA3": Point(x= 0.18, y=0.0, z=0.0),
+                "ESQUINA1": Point(x=0.4,y=-0.4,z=0.0)
             }
 
         # GUARDAMOS LA CLAVE DEL PUNTO QUE SIGUE EN LA RUTA DE PATRULLA
