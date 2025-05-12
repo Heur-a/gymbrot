@@ -19,8 +19,12 @@ data = {
 // DATOS DEL MAPA 
 // Código de ayuda para cargar canvas y marcar robot en el mapa
 // Cargar metadatos del mapa
-const mapYamlUrl = '../assets/gym_map_new.yaml'; // poner ubicación
-const mapImageUrl = '../assets/gym_map_new.png'; // poner ubicación
+let mapYamlUrl
+let mapImageUrl
+const mapYamlUrlSim = '../assets/gym_map_new.yaml'; // poner ubicación
+const mapImageUrlSim = '../assets/gym_map_new.png'; // poner ubicación
+const mapYamlUrlReal = '../assets/mapa_real.yaml'
+const mapImageUrlReal = '../assets/mapa_real.pgm'
 
 let mapInfo = null;
 let canvas
@@ -96,12 +100,12 @@ async function connect() {
     // Load map things
     canvas = document.getElementById("mapCanvas");
     ctx = canvas.getContext("2d");
-    loadmap()
+    changeMap(false)
 
     odom.subscribe((message) => {
-           robotPosition.x = message.pose.pose.position.x;
-           robotPosition.y = message.pose.pose.position.y;
-           draw();  // redibuja mapa + posición del robot
+        robotPosition.x = message.pose.pose.position.x + 2.0;
+        robotPosition.y = message.pose.pose.position.y;
+        draw();  // redibuja mapa + posición del robot
     })
 
     // Re-create the locationGoal publisher with the active ROS connection
@@ -254,4 +258,17 @@ function draw() {
     ctx.fillStyle = 'green';
     ctx.arc(pixelX, pixelY, 5, 0, 2 * Math.PI);
     ctx.fill();
+}
+
+
+function changeMap(real){
+    if (real) {
+        mapYamlUrl = mapYamlUrlReal
+        mapImageUrl = mapImageUrlReal
+        
+    } else {
+        mapYamlUrl = mapYamlUrlSim
+        mapImageUrl = mapImageUrlSim
+    }
+    loadmap()
 }
