@@ -18,43 +18,55 @@ function togglePassword() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
+    if (!loginForm) {
+        console.error('Login form not found!');
+        return;
+    }
+
     const emailInput = loginForm.querySelector('input[type="email"]');
     const passwordInput = loginForm.querySelector('input[type="password"]');
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-            const email = emailInput.value;
-            const password = passwordInput.value;
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
+        try {
+            const response = await fetch('/rosweb/php/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ email, password })
+            });
+
+            // DEBUG: ver la respuesta cruda antes de parsear
+            const text = await response.text();
+            console.log('Respuesta raw:', text);
+
+            let data;
             try {
-                const response = await fetch('../php/login.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Redirigir según el tipo de usuario
-                    if (data.user_type === 1) { // Admin
-                        window.location.href = 'admin.html';
-                    } else { // Usuario normal
-                        window.location.href = 'landing.html';
-                    }
-                } else {
-                    alert(data.message || 'Error en el login');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('JSON inválido:', e);
+                alert('Respuesta del servidor no válida. Revisa la consola.');
+                return;
             }
-        });
-    } else {
-        console.error('Login form not found!');
-    }
+
+            if (data.success) {
+                // Redirigir según el tipo de usuario
+                if (data.user_type === 1) { // Admin
+                    window.location.href = 'admin.html';
+                } else { // Usuario normal
+                    window.location.href = 'landing.html';
+                }
+            } else {
+                alert(data.message || 'Error en el login');
+            }
+
+        } catch (error) {
+            console.error('Error de red o CORS:', error);
+            alert('Error al conectar con el servidor');
+        }
+    });
 });

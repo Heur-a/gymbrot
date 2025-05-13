@@ -16,6 +16,23 @@ data = {
     connected: false
 }
 
+// DATOS DEL MAPA 
+// Código de ayuda para cargar canvas y marcar robot en el mapa
+// Cargar metadatos del mapa
+let mapYamlUrl
+let mapImageUrl
+const mapYamlUrlSim = '../assets/gym_map_new.yaml'; // poner ubicación
+const mapImageUrlSim = '../assets/gym_map_new.png'; // poner ubicación
+const mapYamlUrlReal = '../assets/mapa_real.yaml'
+const mapImageUrlReal = '../assets/mapa_real.png'
+
+let mapInfo = null;
+let canvas
+let ctx
+let image = new Image();
+let robotPosition = { x: 0, y: 0 };
+let aspectRatio = 1;
+
 /**
  * Publisher for sending location goals to the robot.
  * @type {ROSLIB.Topic}
@@ -24,6 +41,12 @@ let locationGoal = new ROSLIB.Topic({
     ros: data.ros,
     name: '/locationGoal',
     messageType: 'interfaces_gymbrot/msg/LocationGoal'
+})
+
+let irMaquina = new ROSLIB.Service({
+    ros: data.ros,
+    name: '/ir_maquina',
+    serviceType: 'interfaces_gymbrot/srv/IrMaquina'
 })
 
 /**
@@ -45,18 +68,26 @@ let machine_3 = { x: -3, y: 2.0 }
  * @param {number} pos_Y - Target Y coordinate.
  */
 function moveToMachine(pos_X, pos_Y) {
-    let message = new ROSLIB.Message({
+    let request = new ROSLIB.ServiceRequest({
         x: pos_X,
         y: pos_Y
     })
-    locationGoal.publish(message)
+    irMaquina.callService(request, (result) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado correctamente")
+    }, (error) => {
+        data.service_busy = false
+        data.service_response = JSON.stringify(result)
+        alert("Mensaje enviado con errores")
+    })
 }
 
 /**
  * Initializes a ROS connection, subscribes to `/odom`,
  * and sets up connection, error, and disconnection callbacks.
  */
-function connect() {
+async function connect() {
     data.ros = new ROSLIB.Ros({
         url: data.rosbridge_address
     })
@@ -67,11 +98,17 @@ function connect() {
         messageType: 'nav_msgs/msg/Odometry'
     })
 
+    // Load map things
+    canvas = document.getElementById("mapCanvas");
+    ctx = canvas.getContext("2d");
+    changeMap(false)
+
     odom.subscribe((message) => {
-        // Example code for accessing odometry position (currently commented)
-        // data.position = message.pose.pose.position
-        // document.getElementById("pos_x").innerHTML = data.position.x.toFixed(2)
-        // document.getElementById("pos_y").innerHTML = data.position.y.toFixed(2)
+        robotPosition.x = message.pose.pose.position.x + 2.0;
+        robotPosition.y = message.pose.pose.position.y;
+        console.log("X: " + robotPosition.x)
+        console.log("Y: " + robotPosition.y)
+        draw();  // redibuja mapa + posición del robot
     })
 
     // Re-create the locationGoal publisher with the active ROS connection
@@ -79,6 +116,13 @@ function connect() {
         ros: data.ros,
         name: '/locationGoal',
         messageType: 'interfaces_gymbrot/msg/LocationGoal'
+    })
+
+    // Conectar a servicio
+    irMaquina = new ROSLIB.Service({
+        ros: data.ros,
+        name: '/ir_maquina',
+        serviceType: 'interfaces_gymbrot/srv/IrMaquina'
     })
 
     // Connection event handlers
@@ -167,3 +211,96 @@ document.addEventListener('DOMContentLoaded', event => {
     }
 
 })
+
+/**
+ * Loads map metadata from a YAML file and displays the map image on the canvas.
+ * This function fetches map information, updates the global mapInfo, and draws the image when loaded.
+ *
+ * @param {HTMLImageElement} image - The image element to display the map.
+ * @param {string} mapYamlUrl - The URL of the map YAML metadata file.
+ * @param {HTMLCanvasElement} canvas - The canvas element to draw the map on.
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context for the canvas.
+ */
+async function loadmap() {
+    try {
+        // Cargar metadatos del mapa
+        const yamlResponse = await fetch(mapYamlUrl);
+        const yamlText = await yamlResponse.text();
+        mapInfo = jsyaml.load(yamlText);
+
+        // Cargar imagen del mapa
+        image = new Image();
+        image.src = mapImageUrl;
+        
+        await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
+        });
+
+        // Calcular aspect ratio y actualizar CSS
+        aspectRatio = image.height / image.width;
+        const aspectWrapper = document.getElementById('aspect-ratio-wrapper');
+        aspectWrapper.style.paddingTop = `${aspectRatio * 100}%`;
+
+        // Configurar canvas (buffer)
+        canvas.width = image.width;  // Dimensiones reales
+        canvas.height = image.height;
+        
+        // Redibujar
+        draw();
+
+    } catch (error) {
+        console.error('Error loading map:', error);
+        alert('Error al cargar el mapa');
+    }
+}
+
+/**
+ * Redraws the map and the robot's position on the canvas.
+ * This function clears the canvas, draws the map image, and overlays the robot's current location.
+ */
+function draw() {
+    if (!mapInfo || !image.complete) return;
+
+    // Limpiar y dibujar imagen
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    // Obtener factores de escala reales
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    const scaleX = displayWidth / canvas.width;
+    const scaleY = displayHeight / canvas.height;
+
+    // Dibujar robot (coordenadas ajustadas)
+    const pixelX = (robotPosition.x - mapInfo.origin[0]) / mapInfo.resolution;
+    const pixelY = (robotPosition.y - mapInfo.origin[1]) / mapInfo.resolution;
+    
+    ctx.beginPath();
+    ctx.arc(
+        pixelX * scaleX, 
+        (canvas.height - pixelY) * scaleY, // Invertir Y
+        5 * Math.min(scaleX, scaleY),      // Tamaño escalado
+        0, 
+        2 * Math.PI
+    );
+    ctx.fill();
+}
+
+/**
+ * Switches between the real and simulated map sources and loads the selected map.
+ * This function updates the map YAML and image URLs based on the input and triggers map loading.
+ *
+ * @param {boolean} real - If true, loads the real map; otherwise, loads the simulated map.
+ */
+function changeMap(real){
+    if (real) {
+        mapYamlUrl = mapYamlUrlReal
+        mapImageUrl = mapImageUrlReal
+        
+    } else {
+        mapYamlUrl = mapYamlUrlSim
+        mapImageUrl = mapImageUrlSim
+    }
+    loadmap()
+}
