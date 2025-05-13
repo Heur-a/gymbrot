@@ -2,7 +2,8 @@
 ROS2 Navigation Node for handling goal requests and executing navigation actions.
 
 This node subscribes to location goals and interfaces with Nav2's NavigateToPose action server
-to execute autonomous navigation commands.
+to execute autonomous navigation commands. Implements patrol route management and service-based
+goal interruption capabilities.
 
 License: GNU 3.0
 Copyright (c) 2025 Gymbrot Team
@@ -26,28 +27,58 @@ feedback_period = 0.75
 class NavigationNode(Node):
     """ROS2 Node that handles navigation goals and executes them using Nav2's NavigateToPose action.
 
-        Attributes:
-            _action_client (ActionClient): Client for the NavigateToPose action server
-            subscription (Subscription): Subscriber for LocationGoal messages
-            current_goal (Point): Currently active navigation goal coordinates
-            last_sent_goal (Point): Last successfully sent goal coordinates
-            is_active (bool): Flag indicating if a navigation action is currently in progress
-            epsilon (float): Tolerance threshold for goal position comparisons
-        """
+    Implements a state machine for managing patrol routes and handling external goal requests through
+    a service interface. Maintains persistent connection to Nav2 action server and implements robust
+    error handling for navigation tasks.
+
+    Attributes:
+        _action_client (ActionClient): Client for the NavigateToPose action server
+        service (Service): Service server for handling external goal requests
+        sim_time (bool): Flag indicating simulation vs real robot operation
+        patrol_points (dict): Dictionary of predefined patrol points with string keys
+        current_patrol_goal_key (str): Current target key in patrol_points dictionary
+        current_goal (Point): Currently active navigation goal coordinates
+        last_sent_goal (Point): Last successfully sent goal coordinates
+        is_active (bool): Flag indicating active navigation action
+        epsilon (float): Tolerance threshold for position comparisons
+        route_points (list): Buffer for dynamic route planning (reserved for future use)
+    """
+
     def __init__(self):
-        """Initialize the navigation node and its components."""
+        """Initialize navigation node with configuration parameters and service endpoints.
+
+        Sets up action client, service interface, and patrol point configuration based on
+        simulation/reality mode. Starts initial navigation sequence.
+        """
         super().__init__('navigation_node')
         self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
-        self.service = self.create_service(IrMaquina,'/ir_maquina', self.service_irq_callback)
+        self.service = self.create_service(IrMaquina, '/ir_maquina', self.service_irq_callback)
 
-        self.declare_parameter('robot_real',False)
-
-        # Parametro si es imulacion o no
+        self.declare_parameter('robot_real', False)
         self.sim_time = self.get_parameter('robot_real').get_parameter_value().bool_value
 
         self.route_points = []
-        #TODO: CAMBIAR DE PONER LOS PUNTOS A PELO A QUE LOS RECOJA DE LA BBDD
-        if self.sim_time is False:
+        self._configure_patrol_points()
+        self.current_patrol_goal_key = list(self.patrol_points.keys())[0]
+        self.current_goal = self.patrol_points[self.current_patrol_goal_key]
+        self.last_sent_goal = None
+        self.is_active = False
+        self.epsilon = 0.01
+
+        self.send_goal(self.current_goal)
+
+    def _configure_patrol_points(self):
+        """Configure patrol points dictionary based on operation mode.
+
+        Populates different coordinate sets for simulation and real-world environments.
+        """
+        if self.sim_time:
+            self.patrol_points = {
+                "ESQUINA2": Point(x=0.5, y=0.4, z=0.0),
+                "ESQUINA3": Point(x=0.18, y=0.0, z=0.0),
+                "ESQUINA1": Point(x=0.4, y=-0.4, z=0.0)
+            }
+        else:
             self.patrol_points = {
                 "PESAS1": Point(x=-4.0, y=-3.5, z=0.0),
                 "PESAS2": Point(x=-4.0, y=-0.5, z=0.0),
@@ -55,62 +86,35 @@ class NavigationNode(Node):
                 "PESAS4": Point(x=1.5, y=4.0, z=0.0),
                 "PESAS5": Point(x=5.0, y=4.0, z=0.0),
             }
-        else:
-            self.patrol_points = {
-                "ESQUINA2": Point(x=0.5, y=0.4, z=0.0),
-                "ESQUINA3": Point(x= 0.18, y=0.0, z=0.0),
-                "ESQUINA1": Point(x=0.4,y=-0.4,z=0.0)
-            }
-
-        # GUARDAMOS LA CLAVE DEL PUNTO QUE SIGUE EN LA RUTA DE PATRULLA
-        self.current_patrol_goal_key = list(self.patrol_points.keys())[0]
-
-        self.current_goal = self.patrol_points[self.current_patrol_goal_key]
-        self.last_sent_goal = None  # Almacena el último objetivo enviado
-        self.is_active = False
-        self.epsilon = 0.01  # Margen para comparación de coordenadas
-
-        # Empezar bucle
-        self.send_goal(self.current_goal)
 
     def next_point_controller(self):
+        """Manage patrol route progression and goal updates.
+
+        Advances to next patrol point in sequence when current target is reached.
+        Implements circular buffer behavior for continuous patrol routes.
         """
-        Actualiza y/o devuelve el robot a su patrulla normal
-        :return:
-        """
-        # Si hemos llegado al punto de patrulla,
-        # Hay que ir al siguiente
-        if (self._is_same_goal(self.current_goal, self.patrol_points[self.current_patrol_goal_key])):
-            # Pasamos la clave del punto a index
-            # Para poder hacer aritmetica
-            # Y asignarle el siguiente punto
-            current_patrol_index = list(self.patrol_points.keys()).index(self.current_patrol_goal_key)
-
-            # Avanzamos al siguiente punto, en bucle
-            next_patrol_index = (current_patrol_index + 1) % len(self.patrol_points)
-
-            # Convertimos el index otra vez en key
-            # Para poder buscar el punto en el diccionario
-            self.current_patrol_goal_key = list(self.patrol_points.keys())[next_patrol_index]
-
-            #Avisar de cambio a siguiente punto
+        if self._is_same_goal(self.current_goal, self.patrol_points[self.current_patrol_goal_key]):
+            current_idx = list(self.patrol_points.keys()).index(self.current_patrol_goal_key)
+            next_idx = (current_idx + 1) % len(self.patrol_points)
+            self.current_patrol_goal_key = list(self.patrol_points.keys())[next_idx]
             self.get_logger().info("Ruta a siguiente punto de patrulla actualizado")
 
-        # Si hemos llegado se envia con el goal de patrulla actualizado
-        # Sino, con el ultimo establecido
-        self.get_logger().info("Siguiente punto, robot yendo a " + self.current_patrol_goal_key)
+        self.get_logger().info(f"Siguiente punto, robot yendo a {self.current_patrol_goal_key}")
         self.send_goal(self.patrol_points[self.current_patrol_goal_key])
-        return
 
     def service_irq_callback(self, req, res):
-        """Non-blocking service handler with async cancellation
+        """Handle asynchronous goal requests via service interface.
 
         Args:
-            req (IrMaquina.Request): Service request with new coordinates
-            res (IrMaquina.Response): Immediate service response
+            req (IrMaquina.Request): Service request containing:
+                - x: float32 target x-coordinate
+                - y: float32 target y-coordinate
+            res (IrMaquina.Response): Service response containing:
+                - res: string status message
+                - codigo: int8 status code
 
         Returns:
-            IrMaquina.Response: Status acknowledgement
+            IrMaquina.Response: Immediate response indicating request acceptance status
         """
         new_goal = Point(x=req.x, y=req.y, z=0.0)
 
@@ -119,38 +123,33 @@ class NavigationNode(Node):
             res.codigo = 0
             return res
 
-        # Store request context for async handling
         self.pending_req = (req, res)
         self.current_goal = new_goal
 
         if self.is_active:
             self.get_logger().info("Async cancellation initiated")
             self.goal_handle.cancel_goal_async()
-
         else:
             self.send_goal(new_goal)
             res.res = "New goal accepted"
             res.codigo = 1
 
-        # Always return immediately with interim status
         res.res = "Request processing started"
         res.codigo = 2
         return res
 
-
-
     def send_goal(self, point):
-        """Send a navigation goal to the action server.
+        """Send navigation goal to action server with duplicate detection.
 
-                Args:
-                    point (Point): Target position in map coordinates
+        Args:
+            point (Point): Target coordinates in map frame
 
-                Raises:
-                    RuntimeError: If action server is unavailable
-                """
-        # if self._is_same_goal(point, self.last_sent_goal):
-        #     self.get_logger().info('Objetivo idéntico al anterior, ignorando...')
-        #     return
+        Raises:
+            RuntimeError: If action server becomes unavailable during request
+        """
+        if self._is_same_goal(point, self.last_sent_goal):
+            self.get_logger().info('Objetivo idéntico al anterior, ignorando...')
+            return
 
         goal_msg = NavigateToPose.Goal()
         goal_msg.pose = PoseStamped()
@@ -162,7 +161,7 @@ class NavigationNode(Node):
         self._action_client.wait_for_server()
         self.get_logger().info(f'Enviando nuevo objetivo: X: {point.x:.2f}, Y: {point.y:.2f}')
         self.is_active = True
-        self.last_sent_goal = point  # Actualizar último objetivo enviado
+        self.last_sent_goal = point
         self.current_goal = point
 
         self._send_goal_future = self._action_client.send_goal_async(
@@ -172,23 +171,26 @@ class NavigationNode(Node):
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def _is_same_goal(self, goal1, goal2) -> bool:
-        """Compare two goals with position tolerance.
+        """Compare two positions with tolerance threshold.
 
-                Args:
-                    goal1 (Point): First goal to compare
-                    goal2 (Point): Second goal to compare
+        Args:
+            goal1 (Point): First position to compare
+            goal2 (Point): Second position to compare
 
-                Returns:
-                    bool: True if goals are within epsilon tolerance, False otherwise
-                """
-        """Compara dos objetivos con margen de error epsilon"""
-        if goal1 is None or goal2 is None:
+        Returns:
+            bool: True if positions are within epsilon tolerance in both axes
+        """
+        if None in (goal1, goal2):
             return False
         return (math.isclose(goal1.x, goal2.x, abs_tol=self.epsilon) and
                 math.isclose(goal1.y, goal2.y, abs_tol=self.epsilon))
 
     def goal_response_callback(self, future):
-        """Handle response from action server after goal submission."""
+        """Handle action server response to goal submission.
+
+        Args:
+            future (concurrent.futures.Future): Async result container for goal acceptance status
+        """
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
             self.get_logger().info('Objetivo rechazado')
@@ -200,51 +202,42 @@ class NavigationNode(Node):
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
-        """Process final navigation result with proper error handling"""
-
-        result = future.result().result
-        status = future.result().status
-
-        self.is_active = False
-
-            # Valid final statuses: SUCCEEDED(4), CANCELED(2), ABORTED(5)
-        if status == GoalStatus.STATUS_SUCCEEDED:
-            # Si llegamos al final del punto, volvemos al bucle
-                self.get_logger().info(f"Navigation succeeded to {self.current_pos.x:.2f},{self.current_pos.y:.2f}")
-                self.next_point_controller()
-        elif status == GoalStatus.STATUS_CANCELED or status == GoalStatus.STATUS_ABORTED:
-            # Si hemos cancelado la accion o se ha abortado
-            # Vamos a la current goal puesta
-            # Esto se debe a que cancelamos la goal cuando llega un punto del servicio
-                self.send_goal(self.current_goal)
-        else:
-                self.get_logger().warning(f"Navigation interrupted: {status}")
-        return
-
-    def feedback_callback(self, feedback_msg):
-        """Process navigation feedback with rate limiting (0.5Hz).
+        """Process final navigation result and manage state transitions.
 
         Args:
-            feedback_msg (NavigateToPose.Feedback): Navigation progress feedback
+            future (concurrent.futures.Future): Async result container containing navigation outcome
         """
-        # Rate limiting implementation
+        result = future.result().result
+        status = future.result().status
+        self.is_active = False
+
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info(f"Navigation succeeded to {self.current_pos.x:.2f},{self.current_pos.y:.2f}")
+            self.next_point_controller()
+        elif status in (GoalStatus.STATUS_CANCELED, GoalStatus.STATUS_ABORTED):
+            self.send_goal(self.current_goal)
+        else:
+            self.get_logger().warning(f"Navigation interrupted: {status}")
+
+    def feedback_callback(self, feedback_msg):
+        """Process and display navigation feedback with rate limiting.
+
+        Args:
+            feedback_msg (NavigateToPose.Feedback): Navigation progress update containing:
+                - current_pose: geometry_msgs/PoseStamped current robot position
+                - distance_remaining: float32 remaining distance to goal
+                - navigation_time: builtin_interfaces/Duration elapsed navigation time
+        """
         current_time = self.get_clock().now()
 
-        # Initialize last feedback time on first call
         if not hasattr(self, 'last_feedback_time'):
             self.last_feedback_time = current_time
 
-        # Calculate time since last feedback display
         elapsed_time = (current_time - self.last_feedback_time).nanoseconds * 1e-9
-
-        # Only process if 0.5 seconds have passed since last update
         if elapsed_time < feedback_period:
             return
 
-        # Store current time for next rate limit check
         self.last_feedback_time = current_time
-
-        # Extract and display feedback data
         feedback = feedback_msg.feedback
         self.current_pos = feedback.current_pose.pose.position
         self.get_logger().info(
@@ -255,7 +248,13 @@ class NavigationNode(Node):
 
 
 def main(args=None):
-    """Main entry point for the navigation node."""
+    """Main execution entry point for navigation node.
+
+    Handles node lifecycle management and graceful shutdown procedures.
+
+    Args:
+        args (list, optional): Command-line arguments. Defaults to None.
+    """
     rclpy.init(args=args)
     navigator = NavigationNode()
 
