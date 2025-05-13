@@ -52,3 +52,16 @@ password: turtlebot
 ros2 run image_tools cam2image --ros-args -p burger_mode:=false -p frequency:=10.0 -p reliability:=best_effort
   #Terminal 2
 ros2 run image_tools showimage --ros-args -p show_image:=true -p reliability:=best_effort 
+
+
+#Pruebas WebCam
+Topic: 'webcam/image_raw'
+ros2 run gymbrot_capture_image webcam_publisher
+
+#Pruebas Camara gymbrot
+Topic: '/camera/image_raw'
+ros2 launch gym_world turtlebot3_my_world.launch.py
+#Pruebas Camara robot
+Topic: '/image'
+
+ros2 run gymbrot_capture_image capture_image

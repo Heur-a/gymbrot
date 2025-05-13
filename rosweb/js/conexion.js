@@ -29,7 +29,8 @@ function cambiarAVideoReal() {
     }
 
     // Buscar el contenedor donde se colocará el video (usa clases de Tailwind con caracteres escapados)
-    const contenedor = document.querySelector('.w-full.md\\:w-1\\/2.order-1.md\\:order-1');
+    const contenedor = document.getElementById("robotCameraContainer");
+
 
     if (!contenedor) {
         console.error("❌ No se encontró el contenedor del video");
