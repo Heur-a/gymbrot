@@ -24,7 +24,7 @@ let mapImageUrl
 const mapYamlUrlSim = '../assets/gym_map_new.yaml'; // poner ubicación
 const mapImageUrlSim = '../assets/gym_map_new.png'; // poner ubicación
 const mapYamlUrlReal = '../assets/mapa_real.yaml'
-const mapImageUrlReal = '../assets/mapa_real.pgm'
+const mapImageUrlReal = '../assets/mapa_real.png'
 
 let mapInfo = null;
 let canvas
@@ -105,6 +105,8 @@ async function connect() {
     odom.subscribe((message) => {
         robotPosition.x = message.pose.pose.position.x + 2.0;
         robotPosition.y = message.pose.pose.position.y;
+        console.log("X: " + robotPosition.x)
+        console.log("Y: " + robotPosition.y)
         draw();  // redibuja mapa + posición del robot
     })
 
@@ -219,6 +221,7 @@ document.addEventListener('DOMContentLoaded', event => {
  * @param {CanvasRenderingContext2D} ctx - The 2D rendering context for the canvas.
  */
 async function loadmap() {
+    image = new Image()
     fetch(mapYamlUrl)
         .then(response => response.text())
         .then(yamlText => {
@@ -231,6 +234,7 @@ async function loadmap() {
         canvas.width = image.width
         canvas.height = image.height
         ctx.drawImage(image, 0, 0);
+        draw()
 
     }
 }

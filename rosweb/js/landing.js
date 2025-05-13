@@ -3,6 +3,9 @@ const callButton = document.getElementById('callButton');
 const markersContainer = document.getElementById('markers-container');
 let selectedMarker = null;
 
+//Selector de mapas
+const mapChangeSelector = document.getElementById('mapSelector')
+
 // Función para habilitar el botón
 function enableCallButton() {
     callButton.disabled = false;
@@ -16,6 +19,17 @@ function disableCallButton() {
     callButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
     callButton.classList.remove('bg-[#F1E1A5]', 'text-[#727272]', 'hover:bg-[#F1E1A5]/80');
 }
+
+
+
+// Cambio de mapa
+mapChangeSelector.addEventListener('change', (e) => {
+    if (mapChangeSelector.value == 'map1') {
+        changeMap(false)
+    } else if (mapChangeSelector.value == 'map2') {
+        changeMap(true)
+    }
+})
 
 
 //Funcion para llamar al robot
@@ -264,4 +278,10 @@ function filterCurrentPage() {
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     document.getElementById('exerciseSearch').addEventListener('input', filterCurrentPage);
+    //cargue el mapa seleccionado por el selector
+     if (mapChangeSelector.value == 'map1') {
+        changeMap(false)
+    } else if (mapChangeSelector.value == 'map2') {
+        changeMap(true)
+    }
 });
