@@ -285,3 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         changeMap(true)
     }
 });
+
+window.addEventListener('resize', () => {
+    draw(); // Redibujar manteniendo aspect ratio
+});

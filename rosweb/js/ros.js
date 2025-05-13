@@ -31,6 +31,7 @@ let canvas
 let ctx
 let image = new Image();
 let robotPosition = { x: 0, y: 0 };
+let aspectRatio = 1;
 
 /**
  * Publisher for sending location goals to the robot.
@@ -221,50 +222,77 @@ document.addEventListener('DOMContentLoaded', event => {
  * @param {CanvasRenderingContext2D} ctx - The 2D rendering context for the canvas.
  */
 async function loadmap() {
-    image = new Image()
-    fetch(mapYamlUrl)
-        .then(response => response.text())
-        .then(yamlText => {
-            const doc = jsyaml.load(yamlText);
-            mapInfo = doc;
-            image.src = mapImageUrl;
+    try {
+        // Cargar metadatos del mapa
+        const yamlResponse = await fetch(mapYamlUrl);
+        const yamlText = await yamlResponse.text();
+        mapInfo = jsyaml.load(yamlText);
+
+        // Cargar imagen del mapa
+        image = new Image();
+        image.src = mapImageUrl;
+        
+        await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
         });
 
-    image.onload = () => {
-        canvas.width = image.width
-        canvas.height = image.height
-        ctx.drawImage(image, 0, 0);
-        draw()
+        // Calcular aspect ratio y actualizar CSS
+        aspectRatio = image.height / image.width;
+        const aspectWrapper = document.getElementById('aspect-ratio-wrapper');
+        aspectWrapper.style.paddingTop = `${aspectRatio * 100}%`;
 
+        // Configurar canvas (buffer)
+        canvas.width = image.width;  // Dimensiones reales
+        canvas.height = image.height;
+        
+        // Redibujar
+        draw();
+
+    } catch (error) {
+        console.error('Error loading map:', error);
+        alert('Error al cargar el mapa');
     }
 }
 
-// Función para redibujar mapa y robot
+/**
+ * Redraws the map and the robot's position on the canvas.
+ * This function clears the canvas, draws the map image, and overlays the robot's current location.
+ */
 function draw() {
-    if (!mapInfo || !image.complete) {
-        return;
-    }
+    if (!mapInfo || !image.complete) return;
 
-    // Redibujar el mapa
+    // Limpiar y dibujar imagen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(image, 0, 0);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    // Transformar coordenadas ROS -> imagen
-    const res = mapInfo.resolution;
-    const { origin } = mapInfo;
+    // Obtener factores de escala reales
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    const scaleX = displayWidth / canvas.width;
+    const scaleY = displayHeight / canvas.height;
 
-    // Transformar odom -> pixeles
-    let pixelX = (robotPosition.x - origin[0]) / res;
-    let pixelY = canvas.height - ((robotPosition.y - origin[1]) / res); // invertido en Y
-
-    // Dibujar robot
+    // Dibujar robot (coordenadas ajustadas)
+    const pixelX = (robotPosition.x - mapInfo.origin[0]) / mapInfo.resolution;
+    const pixelY = (robotPosition.y - mapInfo.origin[1]) / mapInfo.resolution;
+    
     ctx.beginPath();
-    ctx.fillStyle = 'green';
-    ctx.arc(pixelX, pixelY, 5, 0, 2 * Math.PI);
+    ctx.arc(
+        pixelX * scaleX, 
+        (canvas.height - pixelY) * scaleY, // Invertir Y
+        5 * Math.min(scaleX, scaleY),      // Tamaño escalado
+        0, 
+        2 * Math.PI
+    );
     ctx.fill();
 }
 
-
+/**
+ * Switches between the real and simulated map sources and loads the selected map.
+ * This function updates the map YAML and image URLs based on the input and triggers map loading.
+ *
+ * @param {boolean} real - If true, loads the real map; otherwise, loads the simulated map.
+ */
 function changeMap(real){
     if (real) {
         mapYamlUrl = mapYamlUrlReal

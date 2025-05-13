@@ -69,12 +69,28 @@
             height: calc(100vh - 200px);
             display: flex;
             flex-direction: column;
+        }
+
+        #aspect-ratio-wrapper {
             position: relative;
+            flex-grow: 1;
+        }
+
+        #aspect-ratio-wrapper::before {
+            content: '';
+            display: block;
+            padding-top: 75%;
+            /* Valor inicial, se actualizará con JS */
         }
 
         #mapCanvas {
-            position: relative;
-            z-index: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            /* Sobreescribe dimensiones inline */
+            height: 100% !important;
+            object-fit: contain;
         }
 
         #markers-container {
@@ -186,12 +202,13 @@
 
             <!-- Mapa -->
             <div class="w-full md:w-1/2 order-1 md:order-1">
+                <!-- Contenedor principal del mapa con aspect ratio dinámico -->
                 <div class="map-container">
-                    <canvas id="mapCanvas" src="../assets/my_map.png" class="flex-grow">
-                    </canvas>
-                    <div id="markers-container" class="absolute inset-0 z-10">
-                        <!-- Los marcadores se añadirán dinámicamente aquí -->
+                    <div id="aspect-ratio-wrapper" class="relative w-full">
+                        <canvas id="mapCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        <div id="markers-container" class="absolute inset-0 z-10"></div>
                     </div>
+
                     <button id="callButton" disabled
                         class="mt-3 md:mt-4 bg-gray-300 text-gray-500 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold w-full text-sm md:text-base cursor-not-allowed transition-colors">
                         Llamar a GymBrot
