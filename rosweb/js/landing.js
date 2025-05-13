@@ -3,6 +3,9 @@ const callButton = document.getElementById('callButton');
 const markersContainer = document.getElementById('markers-container');
 let selectedMarker = null;
 
+//Selector de mapas
+const mapChangeSelector = document.getElementById('mapSelector')
+
 // Función para habilitar el botón
 function enableCallButton() {
     callButton.disabled = false;
@@ -16,6 +19,47 @@ function disableCallButton() {
     callButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
     callButton.classList.remove('bg-[#F1E1A5]', 'text-[#727272]', 'hover:bg-[#F1E1A5]/80');
 }
+
+
+
+// Cambio de mapa
+mapChangeSelector.addEventListener('change', (e) => {
+    if (mapChangeSelector.value == 'map1') {
+        changeMap(false)
+    } else if (mapChangeSelector.value == 'map2') {
+        changeMap(true)
+    }
+})
+
+
+//Funcion para llamar al robot
+callButton.addEventListener('click', (e) => {
+
+    if(window.selectedGym === null){
+        alert('No hay gym seleccionado')
+        return
+    }
+
+       switch(window.selectedGym) {
+        case gyms[0].name:
+            moveToMachine(machine_1.x,machine_1.y)
+            break;
+        case gyms[1].name:
+            moveToMachine(machine_2.x,machine_2.y)
+        case gyms[2].name:
+            moveToMachine(machine_3.x, machine_3.y)
+       }
+
+})
+
+// Datos de los gimnasios
+const gyms = [
+    { id: 1, name: 'Máquina 1' },
+    { id: 2, name: 'Máquina 2' },
+    { id: 3, name: 'Máquina 3' }
+];
+
+
 
 // Variables globales para almacenar los datos
 let pages = [];
@@ -234,4 +278,14 @@ function filterCurrentPage() {
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     document.getElementById('exerciseSearch').addEventListener('input', filterCurrentPage);
+    //cargue el mapa seleccionado por el selector
+     if (mapChangeSelector.value == 'map1') {
+        changeMap(false)
+    } else if (mapChangeSelector.value == 'map2') {
+        changeMap(true)
+    }
+});
+
+window.addEventListener('resize', () => {
+    draw(); // Redibujar manteniendo aspect ratio
 });
