@@ -106,8 +106,6 @@ async function connect() {
     odom.subscribe((message) => {
         robotPosition.x = message.pose.pose.position.x + 2.0;
         robotPosition.y = message.pose.pose.position.y;
-        console.log("X: " + robotPosition.x)
-        console.log("Y: " + robotPosition.y)
         draw();  // redibuja mapa + posición del robot
     })
 
@@ -276,14 +274,10 @@ function draw() {
     const pixelX = (robotPosition.x - mapInfo.origin[0]) / mapInfo.resolution;
     const pixelY = (robotPosition.y - mapInfo.origin[1]) / mapInfo.resolution;
     
+    
     ctx.beginPath();
-    ctx.arc(
-        pixelX * scaleX, 
-        (canvas.height - pixelY) * scaleY, // Invertir Y
-        5 * Math.min(scaleX, scaleY),      // Tamaño escalado
-        0, 
-        2 * Math.PI
-    );
+    ctx.fillStyle = 'green';
+    ctx.arc(pixelX, canvas.height - pixelY, 5, 0, 2 * Math.PI);
     ctx.fill();
 }
 
