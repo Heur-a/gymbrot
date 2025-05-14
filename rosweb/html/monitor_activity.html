@@ -6,6 +6,8 @@
     <title>Monitorizar Actividad - GymBrot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         /* Estilos adicionales si son necesarios */
@@ -51,7 +53,7 @@
         <div class="flex flex-col md:flex-row gap-4 md:gap-8">
 
             <!-- Columna Izquierda: Simulación Cámara/Video -->
-            <div class="w-full md:w-1/2 order-1 md:order-1 flex justify-center items-start">
+            <div id="robotCameraContainer" class="w-full md:w-1/2 order-1 md:order-1 flex justify-center items-start">
                 <div class="relative w-full aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
                     <!-- Simulación de imagen de cámara -->
                     <img src="../assets/ejercicio_prensa.jpg" alt="Vista de cámara" class="w-full h-full object-cover opacity-80">
@@ -68,7 +70,7 @@
                              <rect x="19.5" y="9.75" width="1.5" height="4.5" rx=".75" fill="currentColor"/>
                         </svg> 
                     </div>
-                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 video-overlay-icon cursor-pointer">
+                    <div id="startStreamButton" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 video-overlay-icon cursor-pointer">
                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" class="w-8 h-8">
                              <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
                          </svg>
@@ -142,5 +144,7 @@
     </div>
 
     <script src="../js/monitor_activity.js"></script>
+    <script src="../js/conexion.js"></script>
+
 </body>
 </html> 

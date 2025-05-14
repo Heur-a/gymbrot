@@ -14,7 +14,8 @@
     <buildtool_depend>ament_cmake</buildtool_depend>
     <exec_depend>gymbrot_point_nav_system</exec_depend>
     <exec_depend>gymbrot_interfaces</exec_depend>
-    <exec_depend>gymbrot_world</exec_depend>
+    <exec_depend>gym_world</exec_depend>
+    <exec_depend>gym_capture_image</exec_depend>
     <export>
         <build_type>ament_cmake</build_type>
     </export>

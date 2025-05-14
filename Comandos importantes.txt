@@ -1,9 +1,22 @@
+#Asegurar que funciona el burger_pi
+-Ir a ~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/urdf y copiar ahi el turtlebot3_burger_pi.urdf
+-Ir a ~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/ y modificar el CMakeLists.txt para que incluya (en la zona del los install):
+---------------------------------------
+install(DIRECTORY urdf
+  DESTINATION share/${PROJECT_NAME}
+)
+-------------------------------------
+-Guardar los cambios
+-Hacer colcon build en ~/turtlebot3_ws/
+
 #Iniciar Camara
 #terminal 1:
 export TURTLEBOT3_MODEL=burger_pi
 echo $TURTLEBOT3_MODEL
 ros2 launch gym_world turtlebot3_my_world.launch.py
 
+#Comando para iniciar el sistema de captura
+1
 
 #terminal 2:
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
@@ -15,3 +28,40 @@ ros2 run web_video_server web_video_server
 python3 -m http.server 8000
 
 http://localhost:8000
+http://localhost/rosweb/html/landing.html
+
+
+METER ROSWEB PARA QUE SE PUEDA VER DESDE LOCALHOST
+
+1. Copiar la carpeta rosweb al directorio de Apache:
+sudo cp -r $HOME/turtlebot3_ws/src/gymbrot/rosweb /var/www/html/
+
+2. Cambiar el propietario de la carpeta (para que Apache/PHP pueda acceder):
+sudo chown -R www-data:www-data /var/www/html/rosweb
+
+3. Dar permisos adecuados:
+sudo chmod -R 755 /var/www/html/rosweb
+
+#Pruebas robot
+ros2 run turtlebot3_teleop teleop_keyboard
+
+#SSH
+ssh ubuntu@192.168.0.64
+password: turtlebot
+#Comando para iniciar la captura de imagen
+ros2 run image_tools cam2image --ros-args -p burger_mode:=false -p frequency:=10.0 -p reliability:=best_effort
+  #Terminal 2
+ros2 run image_tools showimage --ros-args -p show_image:=true -p reliability:=best_effort 
+
+
+#Pruebas WebCam
+Topic: 'webcam/image_raw'
+ros2 run gymbrot_capture_image webcam_publisher
+
+#Pruebas Camara gymbrot
+Topic: '/camera/image_raw'
+ros2 launch gym_world turtlebot3_my_world.launch.py
+#Pruebas Camara robot
+Topic: '/image'
+
+ros2 run gymbrot_capture_image capture_image

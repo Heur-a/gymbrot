@@ -6,6 +6,7 @@
     <title>Panel de Administración - GymBrot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
     <style>
         body { font-family: 'Montserrat', sans-serif; }
     </style>
@@ -121,7 +122,7 @@
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">Cámara del Robot</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Vista de la Cámara -->
-                    <div class="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <div id="robotCameraContainer" class="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
                         <img id="robotCamera" src="../assets/robot_camera_placeholder.jpg" alt="Vista de la cámara del robot" class="w-full h-full object-cover">
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="text-gray-500">Cámara no disponible</div>
@@ -132,7 +133,7 @@
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-700">Controles</h3>
                             <div class="flex space-x-2">
-                                <button class="px-3 py-1 bg-[#F1E1A5] text-[#727272] rounded-lg hover:bg-[#F1E1A5]/80 transition-colors">
+                                <button id="startStreamButton" class="px-3 py-1 bg-[#F1E1A5] text-[#727272] rounded-lg hover:bg-[#F1E1A5]/80 transition-colors">
                                     Iniciar
                                 </button>
                                 <button class="px-3 py-1 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors">
@@ -195,5 +196,6 @@
 
     <script src="../js/admin.js"></script>
     <script src="../js/logout-popup.js"></script>
+    <script src="../js/conexion.js"></script>
 </body>
 </html> 
