@@ -23,8 +23,8 @@ let mapYamlUrl
 let mapImageUrl
 const mapYamlUrlSim = '../assets/gym_map_new.yaml'; // poner ubicación
 const mapImageUrlSim = '../assets/gym_map_new.png'; // poner ubicación
-const mapYamlUrlReal = '../assets/mapa_real.yaml'
-const mapImageUrlReal = '../assets/mapa_real.png'
+const mapYamlUrlReal = '../assets/mapa_real_v2.yaml'
+const mapImageUrlReal = '../assets/mapa_real_v2.png'
 
 let mapInfo = null;
 let canvas
@@ -32,6 +32,7 @@ let ctx
 let image = new Image();
 let robotPosition = { x: 0, y: 0 };
 let aspectRatio = 1;
+let siml = null;
 
 /**
  * Publisher for sending location goals to the robot.
@@ -92,22 +93,37 @@ async function connect() {
         url: data.rosbridge_address
     })
 
-    let odom = new ROSLIB.Topic({
+    // let odom = new ROSLIB.Topic({
+    //     ros: data.ros,
+    //     name: '/odom',
+    //     messageType: 'nav_msgs/msg/Odometry'
+    // })
+
+    let amcl_pose = new ROSLIB.Topic({
         ros: data.ros,
-        name: '/odom',
-        messageType: 'nav_msgs/msg/Odometry'
-    })
+        name: '/amcl_pose', // Topic correcte
+        messageType: 'geometry_msgs/msg/PoseWithCovarianceStamped' // Tipus de missatge
+    });
 
     // Load map things
     canvas = document.getElementById("mapCanvas");
     ctx = canvas.getContext("2d");
     changeMap(false)
 
-    odom.subscribe((message) => {
-        robotPosition.x = message.pose.pose.position.x + 2.0;
+    // odom.subscribe((message) => {
+    //     robotPosition.x = siml ? message.pose.pose.position.x + 2.0 : message.pose.pose.position.x;
+    //     robotPosition.y = message.pose.pose.position.y;
+    //     console.log("X: " + message.pose.pose.position.x + ", Y: " + message.pose.pose.position.y)
+    //     draw();  // redibuja mapa + posición del robot
+    // })
+
+    amcl_pose.subscribe((message) => {
+        robotPosition.x = message.pose.pose.position.x;
         robotPosition.y = message.pose.pose.position.y;
+        console.log("X: " + message.pose.pose.position.x + ", Y: " + message.pose.pose.position.y)
         draw();  // redibuja mapa + posición del robot
     })
+
 
     // Re-create the locationGoal publisher with the active ROS connection
     locationGoal = new ROSLIB.Topic({
@@ -229,7 +245,7 @@ async function loadmap() {
         // Cargar imagen del mapa
         image = new Image();
         image.src = mapImageUrl;
-        
+
         await new Promise((resolve, reject) => {
             image.onload = resolve;
             image.onerror = reject;
@@ -243,7 +259,7 @@ async function loadmap() {
         // Configurar canvas (buffer)
         canvas.width = image.width;  // Dimensiones reales
         canvas.height = image.height;
-        
+
         // Redibujar
         draw();
 
@@ -267,14 +283,12 @@ function draw() {
     // Obtener factores de escala reales
     const displayWidth = canvas.offsetWidth;
     const displayHeight = canvas.offsetHeight;
-    const scaleX = displayWidth / canvas.width;
-    const scaleY = displayHeight / canvas.height;
 
     // Dibujar robot (coordenadas ajustadas)
     const pixelX = (robotPosition.x - mapInfo.origin[0]) / mapInfo.resolution;
     const pixelY = (robotPosition.y - mapInfo.origin[1]) / mapInfo.resolution;
-    
-    
+
+
     ctx.beginPath();
     ctx.fillStyle = 'green';
     ctx.arc(pixelX, canvas.height - pixelY, 5, 0, 2 * Math.PI);
@@ -287,14 +301,15 @@ function draw() {
  *
  * @param {boolean} real - If true, loads the real map; otherwise, loads the simulated map.
  */
-function changeMap(real){
+function changeMap(real) {
     if (real) {
         mapYamlUrl = mapYamlUrlReal
         mapImageUrl = mapImageUrlReal
-        
+
     } else {
         mapYamlUrl = mapYamlUrlSim
         mapImageUrl = mapImageUrlSim
     }
+    siml = !real
     loadmap()
 }

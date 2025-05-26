@@ -96,9 +96,9 @@ class NavigationNode(Node):
         if self.robot_real:
             self.epsilon = 0.0001
             self.patrol_points = {
-                "ESQUINA1": Point(x=0.34, y=-0.24, z=0.0),
-                "ESQUINA2": Point(x=0.6, y=-0.3, z=0.0),
-                "ESQUINA3": Point(x=0.6, y=0.0, z=0.0)
+                "ESQUINA1": Point(x=0.5, y=0.0, z=0.0),
+                "ESQUINA2": Point(x=1.0, y=-0.15, z=0.0),
+                "ESQUINA3": Point(x=0.0, y=0.0, z=0.0)
 
             }
         else:
