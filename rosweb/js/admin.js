@@ -15,6 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar listeners de eventos
     initEventListeners();
+    
+    // Llamar a la función después de cargar el DOM
+    loadActivityPieChart();
+    loadUserExercisesChart();
+    loadActivityBarChart();
+    loadExerciseTable();
+    loadExerciseStats();
 });
 
 // Inicializar event listeners
@@ -367,4 +374,170 @@ function editUser(userId) {
 
 // Cargar datos iniciales
 loadRobotData();
-loadUsersData(); 
+loadUsersData();
+
+// Gráfica de pastel de actividades
+function loadActivityPieChart() {
+    fetch('../php/get_activity_stats.php')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('activityPieChart');
+            if (!ctx) return;
+            if (ctx.chart) ctx.chart.destroy();
+            ctx.chart = new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: data.map(item => {
+                        switch(item.activity_type) {
+                            case 'login': return 'Inicio de sesión';
+                            case 'logout': return 'Cierre de sesión';
+                            case 'exercise': return 'Ejercicios';
+                            case 'profile_update': return 'Actualización de perfil';
+                            case 'robot_interaction': return 'Interacción con robot';
+                            default: return item.activity_type;
+                        }
+                    }),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#F1E1A5', '#727272', '#60A5FA', '#A78BFA', '#F59E42'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        });
+}
+
+// Gráfica de barras de ejercicios por usuario
+function loadUserExercisesChart() {
+    fetch('../php/user_exercise_stats.php')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('userExercisesChart');
+            if (!ctx) return;
+            if (ctx.chart) ctx.chart.destroy();
+            ctx.chart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.email),
+                    datasets: [{
+                        label: 'Ejercicios realizados',
+                        data: data.map(item => item.total),
+                        backgroundColor: '#F1E1A5',
+                        borderColor: '#727272',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Total de ejercicios' } },
+                        x: { title: { display: true, text: 'Usuarios' } }
+                    }
+                }
+            });
+        });
+}
+
+// Gráfica de barras de ejercicios más realizados
+function loadActivityBarChart() {
+    fetch('../php/get_activity_stats.php?type=exercises')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('activityBarChart');
+            if (!ctx) return;
+            if (ctx.chart) ctx.chart.destroy();
+            ctx.chart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.exercise_name),
+                    datasets: [{
+                        label: 'Veces realizado',
+                        data: data.map(item => item.count),
+                        backgroundColor: '#60A5FA',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: {
+                        x: { title: { display: false }, grid: { display: false } },
+                        y: { beginAtZero: true, title: { display: false }, grid: { color: '#eee' } }
+                    }
+                }
+            });
+        });
+}
+
+// Tabla de ejercicios más realizados
+function loadExerciseTable() {
+    fetch('../php/get_activity_stats.php?type=exercises')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('exercise-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-2 text-gray-400" colspan="2">No hay datos</td></tr>';
+                return;
+            }
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b';
+                row.innerHTML = `
+                    <td class="py-2">${item.exercise_name}</td>
+                    <td class="py-2">${item.count}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
+
+function loadExerciseStats() {
+    fetch('../php/exercise_stats.php')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('exercises-stats-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="border-b">
+                        <td colspan="3" class="py-4 text-center text-gray-500">
+                            No hay datos de ejercicios registrados
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            data.forEach(exercise => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="py-2">${exercise.name}</td>
+                    <td class="py-2 font-semibold text-[#727272]">${exercise.total}</td>
+                    <td class="py-2 text-sm text-gray-500">${exercise.last_date || 'N/A'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading exercise stats:', error);
+            const tbody = document.getElementById('exercises-stats-body');
+            tbody.innerHTML = `
+                <tr class="border-b">
+                    <td colspan="3" class="py-4 text-center text-red-500">
+                        Error cargando los datos
+                    </td>
+                </tr>`;
+        });
+} 
