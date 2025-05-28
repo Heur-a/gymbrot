@@ -102,7 +102,7 @@ def main():
     
     estimator = get_model('simple_pose_resnet18_v1b', pretrained=True, ctx=ctx)
     
-    image1_path = "fotos/frame_3.png"
+    image1_path = "../../rosweb/assets/dataset_ejercicios/IMG_7666.png"
     image2_path = "fotos/frame_0068.png"
     
     coords1, conf1, shape1, frame_proc1, bbox1 = load_pose_from_image(image1_path, detector, estimator, ctx)

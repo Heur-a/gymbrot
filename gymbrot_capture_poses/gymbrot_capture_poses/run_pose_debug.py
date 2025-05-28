@@ -57,13 +57,14 @@ def normalize_keypoints(coords, image_shape):
     return coords / np.array([w, h])
 
 def calculate_pose_similarity(coords1, conf1, coords2, conf2, image_shape):
-    if coords1 is None or coords2 is None:
-        print("[WARN] No hay coordenadas para comparar.")
-        return 0.0
-
     assert coords1.shape == coords2.shape
 
-    valid = (conf1.flatten() > 0.1) & (conf2.flatten() > 0.1)
+    # Asegurarse de que confianzas están en forma (17,)
+    conf1 = conf1.flatten()
+    conf2 = conf2.flatten()
+
+    # Subir el umbral de confianza
+    valid = (conf1 > 0.3) & (conf2 > 0.3)
     print(f"[DEBUG] Puntos válidos para comparar: {valid.sum()} de {len(valid)}")
 
     if valid.sum() == 0:
@@ -74,8 +75,35 @@ def calculate_pose_similarity(coords1, conf1, coords2, conf2, image_shape):
     coords2_valid = normalize_keypoints(coords2[valid], image_shape)
 
     distances = np.linalg.norm(coords1_valid - coords2_valid, axis=1)
-    mean_distance = distances.mean()
 
+    # Mostrar distancia por punto
+    print("[DEBUG] Distancias por punto:")
+    for i, d in zip(np.where(valid)[0], distances):
+        print(f"Punto {i}: distancia normalizada = {d:.4f}")
+
+    mean_distance = distances.mean()
+    similarity = max(0.0, 1.0 - mean_distance)
+    return similarity
+
+def calculate_lower_body_similarity(coords1, conf1, coords2, conf2, image_shape):
+    lower_body_indices = [11, 12, 13, 14, 15, 16]
+    
+    valid = [(conf1[i] > 0.1 and conf2[i] > 0.1) for i in lower_body_indices]
+    if not any(valid):
+        print("[WARN] No hay puntos válidos en las piernas.")
+        return 0.0
+
+    distances = []
+    print("[DEBUG] Distancias (solo parte inferior):")
+    for i in lower_body_indices:
+        if conf1[i] > 0.1 and conf2[i] > 0.1:
+            pt1 = coords1[i] / np.array(image_shape[::-1])
+            pt2 = coords2[i] / np.array(image_shape[::-1])
+            dist = np.linalg.norm(pt1 - pt2)
+            distances.append(dist)
+            print(f"Punto {i}: distancia normalizada = {dist:.4f}")
+
+    mean_distance = np.mean(distances)
     similarity = max(0.0, 1.0 - mean_distance)
     return similarity
 
@@ -90,7 +118,7 @@ def main():
     print("[INFO] Cargando modelo de pose...")
     estimator = get_model('alpha_pose_resnet101_v1b_coco', pretrained=True, ctx=ctx)
 
-    image_paths = ["fotos/frame_3.png", "fotos/frame_0004.png"]
+    image_paths = ["../../rosweb/assets/dataset_ejercicios/IMG_7666.png", "fotos/frame_0068.png"]
 
     results = []
     for image_path in image_paths:
@@ -102,6 +130,8 @@ def main():
 
     similarity = calculate_pose_similarity(coords1, conf1, coords2, conf2, image_shape=shape1)
     print(f"[RESULTADO] Índice de similitud de pose: {similarity * 100:.2f}%")
+    similarity_lower = calculate_lower_body_similarity(coords1, conf1, coords2, conf2, image_shape=shape1)
+    print(f"[RESULTADO] Similitud parte inferior del cuerpo: {similarity_lower * 100:.2f}%")
 
 if __name__ == "__main__":
     main()
