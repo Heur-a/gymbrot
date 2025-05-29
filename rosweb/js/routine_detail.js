@@ -1,6 +1,6 @@
 let robotTimer;
 let robotArrivalTime = 3; // 15 segundos
-const epsilonTime = 0.5;
+const epsilonTime = 0.3;
 
 async function esperarRobot(button, str_maquna) {
     let maquina;
@@ -172,6 +172,9 @@ async function loadRoutineDetails() {
 
                     nextButton.disabled = true;
                     nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                    //liberar Robot
+                    liberarRobot(true)
                 });
             }
         });
