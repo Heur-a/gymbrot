@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Rutina - GymBrot</title>
     <script src="https://cdn.tailwindcss.com"></script>
+     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/easeljs@1/lib/easeljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ros2d@0.10.0/build/ros2d.min.js"></script>
+    <script src="static/js/draw_occupancy_grid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../js/routine_detail.js"></script>
+    <script src="../js/ros_rutina.js"></script>
     <style>
         body { font-family: 'Montserrat', sans-serif; }
     </style>
@@ -83,142 +91,6 @@
 
     <!-- Script específico para la lógica de esta página -->
     <script>
-        let robotTimer;
-        let robotArrivalTime = 3; // 3 segundos
-
-        function startRobotTimer(button) {
-            console.log('Iniciando temporizador para el botón:', button.id);
-            button.disabled = true;
-            button.innerHTML = 'El robot está de camino';
-            button.classList.remove('bg-gray-500', 'text-white', 'hover:bg-gray-600');
-            button.classList.add('bg-yellow-500', 'text-white', 'cursor-not-allowed');
-
-            robotTimer = setInterval(() => {
-                robotArrivalTime--;
-                console.log('Tiempo restante:', robotArrivalTime);
-                
-                if (robotArrivalTime <= 0) {
-                    clearInterval(robotTimer);
-                    button.innerHTML = 'Monitorizar';
-                    button.disabled = false;
-                    button.classList.remove('bg-yellow-500', 'cursor-not-allowed');
-                    button.classList.add('bg-green-500', 'hover:bg-green-600');
-                    
-                    button.addEventListener('click', () => {
-                        window.location.href = 'monitor_activity.html';
-                    });
-                }
-            }, 1000);
-        }
-
-        // Función para obtener el ID de la rutina de la URL
-        function getRoutineId() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
-        }
-
-        // Función para cargar los detalles de la rutina
-        async function loadRoutineDetails() {
-            const routineId = getRoutineId();
-            if (!routineId) {
-                alert('ID de rutina no proporcionado');
-                return;
-            }
-
-            try {
-                const response = await fetch(`../php/get_routine_detail.php?id=${routineId}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-
-                // Actualizar el título de la página
-                document.title = `${data.name} - GymBrot`;
-                document.getElementById('routineTitle').textContent = data.name;
-
-                // Contenedor de ejercicios
-                const exercisesContainer = document.getElementById('exercisesContainer');
-                exercisesContainer.innerHTML = '';
-
-                // Crear las tarjetas de ejercicio
-                data.exercises.forEach((exercise, index) => {
-                    const template = document.getElementById('exerciseCardTemplate');
-                    const card = template.content.cloneNode(true);
-
-                    // Configurar la tarjeta
-                    const exerciseCard = card.querySelector('.exercise-card');
-                    exerciseCard.id = `exercise-card-${index + 1}`;
-
-                    // Configurar la imagen
-                    const img = card.querySelector('img');
-                    img.src = exercise.image || '../assets/ejercicio_prensa.jpg';
-                    img.alt = exercise.name;
-
-                    // Configurar el nombre de la máquina
-                    const machineName = card.querySelector('.machine-name');
-                    machineName.textContent = exercise.machine.name;
-
-                    // Configurar la descripción
-                    const description = card.querySelector('.exercise-description');
-                    description.textContent = `Podrás realizar ${exercise.name}`;
-
-                    // Configurar el enlace de detalle
-                    const detailLink = card.querySelector('.exercise-detail-link');
-                    detailLink.href = `exercise_detail.html?id=${exercise.id}`;
-
-                    // Configurar el botón del robot
-                    const robotButton = card.querySelector('.robot-button');
-                    robotButton.id = `robot-button-${index + 1}`;
-                    if (index > 0) {
-                        robotButton.disabled = true;
-                        robotButton.classList.remove('bg-gray-500', 'text-white', 'hover:bg-gray-600');
-                        robotButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                    }
-                    robotButton.addEventListener('click', () => startRobotTimer(robotButton));
-
-                    // Añadir la tarjeta al contenedor
-                    exercisesContainer.appendChild(card);
-
-                    // Añadir botón "Siguiente actividad" entre ejercicios
-                    if (index < data.exercises.length - 1) {
-                        const nextButtonContainer = document.createElement('div');
-                        nextButtonContainer.className = 'flex justify-center py-2';
-                        nextButtonContainer.innerHTML = `
-                            <button class="next-activity-button bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
-                                Siguiente actividad
-                            </button>
-                        `;
-                        exercisesContainer.appendChild(nextButtonContainer);
-
-                        // Configurar el botón "Siguiente actividad"
-                        const nextButton = nextButtonContainer.querySelector('.next-activity-button');
-                        nextButton.addEventListener('click', () => {
-                            exerciseCard.style.backgroundColor = '#4CAF50';
-                            exerciseCard.classList.add('completed');
-
-                            const nextRobotButton = document.getElementById(`robot-button-${index + 2}`);
-                            if (nextRobotButton) {
-                                nextRobotButton.disabled = false;
-                                nextRobotButton.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                                nextRobotButton.classList.add('bg-gray-500', 'text-white', 'hover:bg-gray-600');
-                            }
-
-                            nextButton.disabled = true;
-                            nextButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        });
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error al cargar los detalles de la rutina:', error);
-                alert('Error al cargar los detalles de la rutina');
-            }
-        }
-
-        // Cargar los detalles cuando la página se cargue
-        document.addEventListener('DOMContentLoaded', loadRoutineDetails);
     </script>
 </body>
 </html> 
