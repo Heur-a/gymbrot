@@ -56,6 +56,7 @@ function cambiarAVideoReal() {
 
     // Forzar actualización del stream para evitar imágenes cacheadas
     updateCameraFeed();
+    escucharComentariosROS();
 }
 
 /**
@@ -98,30 +99,55 @@ function connect() {
  *   void
  */
 function escucharComentariosROS() {
-    if (!data.ros) {
-        console.error("❌ No se puede suscribir: ROS no está inicializado");
-        return;
-    }
+    console.log("🟡 Suscribiéndose a /pose_feedback...");
 
-    const comentariosTopic = new ROSLIB.Topic({
+    const comentariosDiv = document.getElementById("comentarios");
+    let primerMensajeRecibido = false;
+
+    data.subscripcion = new ROSLIB.Topic({
         ros: data.ros,
-        name: '/comentarios',  // Cambia si tu tópico se llama diferente
-        messageType: 'std_msgs/msg/String'
+        name: '/pose_feedback',
+        messageType: 'std_msgs/msg/String',
+        queue_size: 10
     });
 
-    comentariosTopic.subscribe((mensaje) => {
-        console.log("💬 Comentario recibido desde ROS:", mensaje.data);
-
-        const comentariosDiv = document.getElementById("comentarios");
+    data.subscripcion.subscribe((mensaje) => {
+        console.log("📨 Mensaje recibido desde ROS:", mensaje.data);
 
         if (comentariosDiv) {
+            // Al primer mensaje, limpiar comentarios previos excepto el título (h3)
+            if (!primerMensajeRecibido) {
+                // Guardamos el título para mantenerlo
+                const titulo = comentariosDiv.querySelector('h3');
+                comentariosDiv.innerHTML = '';
+                if (titulo) comentariosDiv.appendChild(titulo);
+                primerMensajeRecibido = true;
+            }
+
+            // Crear nuevo comentario
             const nuevoComentario = document.createElement("p");
             nuevoComentario.className = "text-sm text-gray-800 bg-gray-100 px-3 py-1 my-1 rounded";
             nuevoComentario.textContent = mensaje.data;
+
             comentariosDiv.appendChild(nuevoComentario);
+
+            // Obtener todos los párrafos de comentarios actuales
+            const comentarios = comentariosDiv.querySelectorAll('p');
+
+            // Si hay más de 5 comentarios, eliminar el más antiguo (el primero)
+            if (comentarios.length > 5) {
+                comentarios[0].remove();
+            }
+
+            // Scroll para mostrar el último comentario
+            comentariosDiv.scrollTop = comentariosDiv.scrollHeight;
         }
     });
 }
+
+
+
+
 
 /**
  * Fuerza la recarga de la imagen del stream para evitar el uso de caché del navegador.
