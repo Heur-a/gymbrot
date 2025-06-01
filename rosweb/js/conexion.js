@@ -87,6 +87,40 @@ function connect() {
         console.log("❌ Error al conectar con ROSBridge");
         console.log(error);
     });
+    escucharComentariosROS();
+}
+/**
+ * Se suscribe al tópico /comentarios en ROS y muestra los mensajes en el DOM.
+ * 
+ * Requiere un <div id="comentarios"> en el HTML.
+ * 
+ * Returns:
+ *   void
+ */
+function escucharComentariosROS() {
+    if (!data.ros) {
+        console.error("❌ No se puede suscribir: ROS no está inicializado");
+        return;
+    }
+
+    const comentariosTopic = new ROSLIB.Topic({
+        ros: data.ros,
+        name: '/comentarios',  // Cambia si tu tópico se llama diferente
+        messageType: 'std_msgs/msg/String'
+    });
+
+    comentariosTopic.subscribe((mensaje) => {
+        console.log("💬 Comentario recibido desde ROS:", mensaje.data);
+
+        const comentariosDiv = document.getElementById("comentarios");
+
+        if (comentariosDiv) {
+            const nuevoComentario = document.createElement("p");
+            nuevoComentario.className = "text-sm text-gray-800 bg-gray-100 px-3 py-1 my-1 rounded";
+            nuevoComentario.textContent = mensaje.data;
+            comentariosDiv.appendChild(nuevoComentario);
+        }
+    });
 }
 
 /**
