@@ -15,9 +15,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="../js/routine_detail.js"></script>
     <script src="../js/ros_rutina.js"></script>
+    <script src="../js/ros.js"></script>
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
+        }
+
+        .map-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #aspect-ratio-wrapper {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        #aspect-ratio-wrapper::before {
+            content: '';
+            display: block;
+            padding-top: 75%;
+            /* Valor inicial, se actualizará con JS */
+        }
+
+        #mapCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            /* Sobreescribe dimensiones inline */
+            height: 100% !important;
+            object-fit: contain;
+        }
+
+        #markers-container {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+        }
+
+        .marker {
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -63,9 +102,10 @@
 
             <!-- Columna Izquierda: Mapa -->
             <div class="w-full md:w-1/2 order-1 md:order-1">
-                <div class="relative h-[150px] md:h-[400px] rounded-xl shadow-lg bg-gray-200">
-                    <div id="markers-container" class="absolute inset-8 md:inset-12">
-                        <!-- Los marcadores se añadirán dinámicamente aquí -->
+                <div class="map-container">
+                    <div id="aspect-ratio-wrapper" class="relative w-full">
+                        <canvas id="mapCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        <div id="markers-container" class="absolute inset-0 z-10"></div>
                     </div>
                 </div>
             </div>
@@ -105,10 +145,6 @@
             </div>
         </div>
     </template>
-
-    <!-- Script específico para la lógica de esta página -->
-    <script>
-    </script>
 </body>
 
 </html>

@@ -7,33 +7,11 @@
 let real = false
 let susc_pos = null
 let esperando_robot = false
-let robotPosition = { x: 0, y: 0 };
 
 
 
-const selector = document.getElementById('mapSelector')
+let selector
 
-
-let machine_1
-let machine_2
-let machine_3
-
-/**
- * Predefined coordinates for machine positions on the map.
- * @type {{x: number, y: number}}
- */
-let machine_1_siml = { x: -3, y: -3.85 }
-
-/** @type {{x: number, y: number}} */
-let machine_2_siml= { x: -3, y: -1.0 }
-
-/** @type {{x: number, y: number}} */
-let machine_3_siml = { x: -3, y: 2.0 }
-
-
-let machine_1_real = {x: 0.5, y: 0.0}
-let machine_2_real = {x: 1.0, y: -0.15}
-let machine_3_real = {x: 0.0, y: 0.0}
 
 data = {
     ros: null,
@@ -42,24 +20,6 @@ data = {
 }
 
 let liberarService
-
-let irMaquina
-
-function moveToMachine(pos_X, pos_Y) {
-    let request = new ROSLIB.ServiceRequest({
-        x: pos_X,
-        y: pos_Y
-    })
-    irMaquina.callService(request, (result) => {
-        data.service_busy = false
-        data.service_response = JSON.stringify(result)
-        alert("Mensaje enviado correctamente")
-    }, (error) => {
-        data.service_busy = false
-        data.service_response = JSON.stringify(result)
-        alert("Mensaje enviado con errores" + error)
-    })
-}
 
 function liberarRobot(cond) {
     let request = new ROSLIB.ServiceRequest({
@@ -92,15 +52,9 @@ function checkRobotHaLlegadoMaquina(maquina, x, y, epsilon) {
 }
 
 
-async function connect() {
+async function connect_rutina() {
     data.ros = new ROSLIB.Ros({
         url: data.rosbridge_address
-    })
-
-    irMaquina = new ROSLIB.Service({
-        ros: data.ros,
-        name: '/ir_maquina',
-        serviceType: 'interfaces_gymbrot/srv/IrMaquina'
     })
 
     liberarService = new ROSLIB.Service({
@@ -135,25 +89,29 @@ async function connect() {
 
 }
 
-function changeMachines (real) {
-
-    if(real) {
-        machine_1 = machine_1_real
-        machine_2 = machine_2_real
-        machine_3 = machine_3_real
-    } else {
-        machine_1 = machine_1_siml
-        machine_2 = machine_2_siml
-        machine_3 = machine_3_siml
-    }
-    console.log('canvi de siml a real, variable real: ' + real)
-    return
-
-}
 
 document.addEventListener('DOMContentLoaded', event => {
 
-    connect()
+    connect_rutina()
+
+    selector = document.getElementById('mapSelector')
+
+    selector.addEventListener('change', event => {
+    switch (selector.value) {
+        case 'map_siml':
+            real = false
+            break;
+        case 'map_real':
+            real = true
+            break;
+        default:
+            alert("algo ha pasado con el selector")
+            return
+            break;
+    }
+    changeMachines(real);
+    return;
+    })
 
     // Connection event handlers
     data.ros.on("connection", () => {
@@ -176,19 +134,3 @@ document.addEventListener('DOMContentLoaded', event => {
 
 })
 
-selector.addEventListener('change', event => {
-    switch (selector.value) {
-        case 'map_siml':
-            real = false
-            break;
-        case 'map_real':
-            real = true
-            break;
-        default:
-            alert("algo ha pasado con el selector")
-            return
-            break;
-    }
-    changeMachines(real);
-    return;
-})
