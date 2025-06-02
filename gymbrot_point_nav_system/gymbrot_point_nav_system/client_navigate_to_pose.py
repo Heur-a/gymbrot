@@ -2,24 +2,25 @@
 ROS2 Navigation Node for handling goal requests and executing navigation actions.
 
 This node subscribes to location goals and interfaces with Nav2's NavigateToPose action server
-to execute autonomous navigation commands. Implements patrol route management and service-based
+to execute autonomous navigation commands. Implements patrol route management and service_maquina-based
 goal interruption capabilities.
 
 License: GNU 3.0
 Copyright (c) 2025 Gymbrot Team
 """
 
-import rclpy
 import math
 
+import rclpy
 from action_msgs.msg import GoalStatus
-from interfaces_gymbrot.msg import LocationGoal
+from geometry_msgs.msg import Point, PoseStamped
 from gymbrot_interfaces.srv import IrMaquina
+from gymbrot_interfaces.srv import LiberarRobotActividad
+from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
 from rclpy.node import Node
-from geometry_msgs.msg import Point, PoseStamped
-from nav2_msgs.action import NavigateToPose
-from rclpy.qos import QoSProfile, ReliabilityPolicy
+
+TIMER_PERIOD_SEC_LIBERAR = 1.5
 
 feedback_period = 0.75
 
@@ -32,9 +33,9 @@ class NavigationNode(Node):
     error handling for navigation tasks.
 
     Attributes:
-        _action_client (ActionClient): Client for the NavigateToPose action server
-        service (Service): Service server for handling external goal requests
-        sim_time (bool): Flag indicating simulation vs real robot operation
+        _action_nav (ActionClient): Client for the NavigateToPose action server
+        service_maquina (Service): Service server for handling external goal requests
+        robot_real (bool): Flag indicating simulation vs real robot operation
         patrol_points (dict): Dictionary of predefined patrol points with string keys
         current_patrol_goal_key (str): Current target key in patrol_points dictionary
         current_goal (Point): Currently active navigation goal coordinates
@@ -45,17 +46,37 @@ class NavigationNode(Node):
     """
 
     def __init__(self):
-        """Initialize navigation node with configuration parameters and service endpoints.
+        """Initialize navigation node with configuration parameters and service_maquina endpoints.
 
-        Sets up action client, service interface, and patrol point configuration based on
+        Sets up action client, service_maquina interface, and patrol point configuration based on
         simulation/reality mode. Starts initial navigation sequence.
         """
         super().__init__('navigation_node')
-        self._action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
-        self.service = self.create_service(IrMaquina, '/ir_maquina', self.service_irq_callback)
+
+        # Cliente servicio navegar a maquina
+        self._action_nav = ActionClient(self, NavigateToPose, '/navigate_to_pose')
+        self.service_maquina = self.create_service(IrMaquina, '/ir_maquina', self.service_maquina_irq_callback)
+        #Liberar cliente
+        self.service_liberar = self.create_service(LiberarRobotActividad,'/liberar', self.servce_liberar_irq_callback)
+
+        # ESTADOS
+        # 0 en ruta, por defecto
+        # 1 yendo a maquina
+        # 2 en maquina, listo para ser liberado
+        self.estado = 0
+        self.liberar_listo = False
+
+        # Inits
+        self.timer_liberar = None
+        self.current_pos = None
+        self.last_feedback_time = None
+        self._get_result_future = None
+        self.goal_handle = None
+        self._send_goal_future = None
+        self.pending_req = None
 
         self.declare_parameter('robot_real', False)
-        self.sim_time = self.get_parameter('robot_real').get_parameter_value().bool_value
+        self.robot_real = self.get_parameter('robot_real').get_parameter_value().bool_value
 
         self.route_points = []
         self._configure_patrol_points()
@@ -72,13 +93,16 @@ class NavigationNode(Node):
 
         Populates different coordinate sets for simulation and real-world environments.
         """
-        if self.sim_time:
+        if self.robot_real:
+            self.epsilon = 0.0001
             self.patrol_points = {
-                "ESQUINA2": Point(x=0.5, y=0.4, z=0.0),
-                "ESQUINA3": Point(x=0.18, y=0.0, z=0.0),
-                "ESQUINA1": Point(x=0.4, y=-0.4, z=0.0)
+                "ESQUINA1": Point(x=0.5, y=0.0, z=0.0),
+                "ESQUINA2": Point(x=1.0, y=-0.15, z=0.0),
+                "ESQUINA3": Point(x=0.0, y=0.0, z=0.0)
+
             }
         else:
+            self.epsilon = 0.01
             self.patrol_points = {
                 "PESAS1": Point(x=-4.0, y=-3.5, z=0.0),
                 "PESAS2": Point(x=-4.0, y=-0.5, z=0.0),
@@ -100,10 +124,11 @@ class NavigationNode(Node):
             self.get_logger().info("Ruta a siguiente punto de patrulla actualizado")
 
         self.get_logger().info(f"Siguiente punto, robot yendo a {self.current_patrol_goal_key}")
+        self.estado = 0
         self.send_goal(self.patrol_points[self.current_patrol_goal_key])
 
-    def service_irq_callback(self, req, res):
-        """Handle asynchronous goal requests via service interface.
+    def service_maquina_irq_callback(self, req, res):
+        """Handle asynchronous goal requests via service_maquina interface.
 
         Args:
             req (IrMaquina.Request): Service request containing:
@@ -125,6 +150,7 @@ class NavigationNode(Node):
 
         self.pending_req = (req, res)
         self.current_goal = new_goal
+        self.estado = 1
 
         if self.is_active:
             self.get_logger().info("Async cancellation initiated")
@@ -137,6 +163,24 @@ class NavigationNode(Node):
         res.res = "Request processing started"
         res.codigo = 2
         return res
+
+
+    def servce_liberar_irq_callback(self,req,res):
+        if self.estado != 2:
+            res.res = "No listo para liberar"
+            res.codigo = 2
+            return res
+        elif req.lib is True:
+            res.res = "Robot Liberado"
+            res.codigo = 0
+            self.liberar_listo = True
+            return res
+        else:
+            res.res = "Sin Cambio"
+            res.codigo = 1
+            return res
+
+
 
     def send_goal(self, point):
         """Send navigation goal to action server with duplicate detection.
@@ -158,13 +202,14 @@ class NavigationNode(Node):
         goal_msg.pose.pose.position = point
         goal_msg.pose.pose.orientation.w = 1.0
 
-        self._action_client.wait_for_server()
+        self._action_nav.wait_for_server()
         self.get_logger().info(f'Enviando nuevo objetivo: X: {point.x:.2f}, Y: {point.y:.2f}')
         self.is_active = True
         self.last_sent_goal = point
         self.current_goal = point
 
-        self._send_goal_future = self._action_client.send_goal_async(
+
+        self._send_goal_future = self._action_nav.send_goal_async(
             goal_msg,
             feedback_callback=self.feedback_callback
         )
@@ -211,11 +256,16 @@ class NavigationNode(Node):
         status = future.result().status
         self.is_active = False
 
-        if status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info(f"Navigation succeeded to {self.current_pos.x:.2f},{self.current_pos.y:.2f}")
+        self.get_logger().info("Navegacion a punto terminada")
+
+        if (status == GoalStatus.STATUS_SUCCEEDED) and (self.estado == 0):
+            if self.current_pos is not None:
+                self.get_logger().info(f"Navigation succeeded to {self.current_pos.x:.2f},{self.current_pos.y:.2f}")
             self.next_point_controller()
-        elif status in (GoalStatus.STATUS_CANCELED, GoalStatus.STATUS_ABORTED):
+        elif (status in (GoalStatus.STATUS_CANCELED, GoalStatus.STATUS_ABORTED)) and (self.estado == 1) :
             self.send_goal(self.current_goal)
+        elif (self.estado == 1) and (status == GoalStatus.STATUS_SUCCEEDED):
+            self.esperar_liberar()
         else:
             self.get_logger().warning(f"Navigation interrupted: {status}")
 
@@ -233,6 +283,9 @@ class NavigationNode(Node):
         if not hasattr(self, 'last_feedback_time'):
             self.last_feedback_time = current_time
 
+        if self.last_feedback_time is None:
+            self.last_feedback_time = current_time
+
         elapsed_time = (current_time - self.last_feedback_time).nanoseconds * 1e-9
         if elapsed_time < feedback_period:
             return
@@ -245,6 +298,25 @@ class NavigationNode(Node):
             f'Remaining: {feedback.distance_remaining:.2f}m | '
             f'Duration: {feedback.navigation_time.sec}s'
         )
+
+    def esperar_liberar(self):
+        """Wait for liberation signal using a timer to avoid blocking."""
+        self.get_logger().info("Robot en espera")
+        self.estado = 2
+        self.liberar_listo = False  # Reset flag
+        # Create a timer to periodically check the flag
+        self.timer_liberar = self.create_timer(TIMER_PERIOD_SEC_LIBERAR, self.check_liberar)
+
+    def check_liberar(self):
+        """Timer callback to check liberation status and proceed."""
+        self.get_logger().info("Robot esperando...")
+        if self.liberar_listo:
+            self.get_logger().info("Robot liberado")
+            self.destroy_timer(self.timer_liberar)
+            self.estado = 0
+            self.liberar_listo = False
+            self.next_point_controller()
+
 
 
 def main(args=None):

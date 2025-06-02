@@ -13,7 +13,7 @@ from rcutils.logging import name_params
 
 def generate_launch_description():
     nav2_yaml = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'robot_real_params.yaml')
-    map_file = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'mapa_real.yaml')
+    map_file = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'mapa_real_v2.yaml')
     rviz_config_dir = os.path.join(get_package_share_directory('gymbrot_point_nav_system'), 'config', 'my_slam.rviz')
     # urdf = os.path.join(get_package_share_directory('turtlebot3_description'), 'urdf', 'turtlebot3_burger.urdf')
     # world = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'worlds', 'turtlebot3_worlds/burger.model')
