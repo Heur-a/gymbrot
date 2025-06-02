@@ -1,0 +1,16 @@
+:py:mod:`gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system`
+===================================================================
+
+.. py:module:: gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   client_navigate_to_pose/index.rst
+   initial_pose_pub/index.rst
+
+

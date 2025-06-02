@@ -1,0 +1,22 @@
+:py:mod:`robot_real.launch`
+===========================
+
+.. py:module:: robot_real.launch
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   robot_real.launch.generate_launch_description
+
+
+
+.. py:function:: generate_launch_description()
+
+
