@@ -50,17 +50,26 @@ let irMaquina = new ROSLIB.Service({
     serviceType: 'interfaces_gymbrot/srv/IrMaquina'
 })
 
+let machine_1
+let machine_2
+let machine_3
+
 /**
  * Predefined coordinates for machine positions on the map.
  * @type {{x: number, y: number}}
  */
-let machine_1 = { x: -3, y: -3.85 }
+let machine_1_siml = { x: -3, y: -3.85 }
 
 /** @type {{x: number, y: number}} */
-let machine_2 = { x: -3, y: -1.0 }
+let machine_2_siml= { x: -3, y: -1.0 }
 
 /** @type {{x: number, y: number}} */
-let machine_3 = { x: -3, y: 2.0 }
+let machine_3_siml = { x: -3, y: 2.0 }
+
+
+let machine_1_real = {x: 0.5, y: 0.0}
+let machine_2_real = {x: 1.0, y: -0.15}
+let machine_3_real = {x: 0.0, y: 0.0}
 
 /**
  * Sends a goal position to the `/locationGoal` topic for the robot to navigate.
@@ -311,5 +320,20 @@ function changeMap(real) {
         mapImageUrl = mapImageUrlSim
     }
     siml = !real
+    changeMachines(real)
     loadmap()
+}
+
+function changeMachines (real) {
+
+    if(real) {
+        machine_1 = machine_1_real
+        machine_2 = machine_2_real
+        machine_3 = machine_3_real
+    } else {
+        machine_1 = machine_1_siml
+        machine_2 = machine_2_siml
+        machine_3 = machine_3_siml
+    }
+
 }

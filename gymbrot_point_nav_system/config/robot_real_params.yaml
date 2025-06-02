@@ -6,9 +6,9 @@ amcl:
     alpha3: 0.2
     alpha4: 0.2
     alpha5: 0.2
-    update_frequency: 20.0
-    publish_frequency: 20.0
-    base_frame_id: "base_footprint"
+    update_frequency: 15.0
+    publish_frequency: 15.0
+    base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -86,6 +86,10 @@ bt_navigator:
     - nav2_navigate_to_pose_action_bt_node
     - nav2_remove_passed_goals_action_bt_node
 
+    wait_for_service_timeout: 1000
+    action_server_result_timeout: 900.0
+
+
 bt_navigator_rclcpp_node:
   ros__parameters:
     use_sim_time: False
@@ -93,13 +97,15 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: False
-    controller_frequency: 20.0
+    controller_frequency: 5.0
     min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
+    min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "goal_checker"
     controller_plugins: ["FollowPath"]
+    costmap_update_timeout: 0.30
 
     # Progress checker parameters
     progress_checker:
@@ -132,9 +138,9 @@ controller_server:
       decel_lim_x: -2.5
       decel_lim_y: 0.0
       decel_lim_theta: -3.2
-      vx_samples: 20
+      vx_samples: 10
       vy_samples: 5
-      vtheta_samples: 20
+      vtheta_samples: 10
       sim_time: 1.7
       linear_granularity: 0.05
       angular_granularity: 0.025
@@ -145,9 +151,9 @@ controller_server:
       stateful: True
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 0.02
-      PathAlign.scale: 32.0
+      PathAlign.scale: 15.0
       PathAlign.forward_point_distance: 0.1
-      GoalAlign.scale: 24.0
+      GoalAlign.scale: 10.0
       GoalAlign.forward_point_distance: 0.1
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
@@ -162,14 +168,14 @@ controller_server_rclcpp_node:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 0.75
-      publish_frequency: 0.6
+      update_frequency: 5.0
+      publish_frequency: 5.0
       global_frame: odom
       robot_base_frame: base_link
       use_sim_time: False
       rolling_window: true
-      width: 3
-      height: 3
+      width: 5
+      height: 5
       resolution: 0.05
       robot_radius: 0.1
       plugins: ["voxel_layer", "inflation_layer"]
@@ -206,13 +212,13 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 0.75            # Menys càlcul
-      publish_frequency: 0.6         # Menys publicació
+      update_frequency: 5.0            # Menys càlcul
+      publish_frequency: 5.0        # Menys publicació
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
       robot_radius: 0.1
-      resolution: 0.05               # Reduït
+      resolution: 0.05
       track_unknown_space: true
       always_send_full_costmap: True
       plugins: [ "static_layer", "obstacle_layer", "inflation_layer" ]
@@ -223,7 +229,7 @@ global_costmap:
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
-        enabled: False
+        enabled: True
         observation_sources: scan
         scan:
           topic: /scan
@@ -247,7 +253,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: False
-    yaml_filename: "turtlebot3_house.yaml"
+    yaml_filename: "mapa_real_v2.yaml"
 
 map_saver:
   ros__parameters:

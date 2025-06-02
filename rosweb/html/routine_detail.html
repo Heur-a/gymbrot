@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Rutina - GymBrot</title>
     <script src="https://cdn.tailwindcss.com"></script>
-     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/easeljs@1/lib/easeljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ros2d@0.10.0/build/ros2d.min.js"></script>
@@ -15,9 +16,12 @@
     <script src="../js/routine_detail.js"></script>
     <script src="../js/ros_rutina.js"></script>
     <style>
-        body { font-family: 'Montserrat', sans-serif; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
     </style>
 </head>
+
 <body class="min-h-screen bg-white">
     <!-- Navbar (reutilizada de landing.html) -->
     <nav class="bg-gradient-to-r from-[#F1E1A5] to-[#727272] text-white p-3 md:p-4 shadow-md sticky top-0 z-50">
@@ -29,8 +33,10 @@
             </div>
             <div class="flex items-center space-x-2 md:space-x-4">
                 <a href="login.html" class="text-white p-2 md:p-3 rounded-full hover:bg-[#727272]/20 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 md:w-8 md:h-8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-7 h-7 md:w-8 md:h-8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </a>
             </div>
@@ -40,11 +46,19 @@
     <!-- Contenido Principal -->
     <div class="container mx-auto p-3 md:p-4">
         <button onclick="history.back()" class="mb-4 text-[#727272] hover:text-[#555] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
             </svg>
             <span class="sr-only">Volver</span>
         </button>
+        <div class="flex items-center">
+            <select id="mapSelector"
+                class="bg-gray-50 border border-gray-300 text-[#727272] rounded-lg px-3 py-1.5 focus:ring-[#F1E1A5] focus:border-[#F1E1A5]">
+                <option value="map_siml">Simulado</option>
+                <option value="map_real">Real</option>
+            </select>
+        </div>
         <div class="flex flex-col md:flex-row gap-4 md:gap-8">
 
             <!-- Columna Izquierda: Mapa -->
@@ -70,18 +84,21 @@
 
     <!-- Template para las tarjetas de ejercicio -->
     <template id="exerciseCardTemplate">
-        <div class="exercise-card bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent transition-colors duration-300">
+        <div
+            class="exercise-card bg-gray-50 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border border-transparent transition-colors duration-300">
             <img src="" alt="" class="w-full sm:w-24 h-24 rounded-lg object-cover">
             <div class="flex-1 min-w-0 text-center sm:text-left">
                 <h3 class="machine-name text-lg md:text-xl font-semibold text-[#727272]"></h3>
                 <p class="exercise-description text-gray-600 text-xs md:text-sm mb-3"></p>
                 <div class="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
                     <a href="exercise_detail.html" class="exercise-detail-link">
-                        <button class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
+                        <button
+                            class="bg-[#F1E1A5] text-[#727272] px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-[#F1E1A5]/80 transition-colors w-full sm:w-auto">
                             Ver información
                         </button>
                     </a>
-                    <button class="robot-button bg-gray-500 text-white px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-600 transition-colors w-full sm:w-auto">
+                    <button
+                        class="robot-button bg-gray-500 text-white px-3 py-2 rounded-lg text-xs md:text-sm font-medium hover:bg-gray-600 transition-colors w-full sm:w-auto">
                         Llamar al robot
                     </button>
                 </div>
@@ -93,4 +110,5 @@
     <script>
     </script>
 </body>
-</html> 
+
+</html>
