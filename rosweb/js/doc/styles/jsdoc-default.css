@@ -33,19 +33,20 @@ html
 
 body
 {
-    font-family: 'Open Sans', sans-serif;
-    line-height: 1.5;
-    color: #4d4e53;
-    background-color: white;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    background-color: #f4f4f9;
+    line-height: 1.6;
 }
 
 a, a:visited, a:active {
-    color: #0095dd;
+    color: #3498db;
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: #2980b9;
 }
 
 header
@@ -111,6 +112,9 @@ nav
     box-sizing: border-box;
     border-left: 1px solid #ccc;
     padding-left: 16px;
+    background-color: #ecf0f1;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 nav ul {
@@ -138,15 +142,18 @@ nav li {
 
 footer {
     display: block;
-    padding: 6px;
-    margin-top: 12px;
+    padding: 10px;
+    margin-top: 20px;
     font-style: italic;
     font-size: 90%;
+    background-color: #bdc3c7;
+    text-align: center;
+    border-radius: 5px;
 }
 
-h1, h2, h3, h4 {
-    font-weight: 200;
-    margin: 0;
+h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50;
+    margin-bottom: 15px;
 }
 
 h1
