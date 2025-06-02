@@ -1,0 +1,24 @@
+:py:mod:`gymbrot.gymbrot_point_nav_system`
+==========================================
+
+.. py:module:: gymbrot.gymbrot_point_nav_system
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   gymbrot_point_nav_system/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   setup/index.rst
+
+

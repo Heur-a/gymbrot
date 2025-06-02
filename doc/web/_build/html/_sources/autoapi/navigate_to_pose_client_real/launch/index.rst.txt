@@ -1,0 +1,22 @@
+:py:mod:`navigate_to_pose_client_real.launch`
+=============================================
+
+.. py:module:: navigate_to_pose_client_real.launch
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   navigate_to_pose_client_real.launch.generate_launch_description
+
+
+
+.. py:function:: generate_launch_description()
+
+

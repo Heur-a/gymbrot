@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose &mdash; documentación de Gymbrot - </title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=0828dd0a"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/translations.js?v=efdbd0b9"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Gymbrot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ROS2 Navigation Node for handling goal requests and executing navigation actions.</span>
+
+<span class="sd">This node subscribes to location goals and interfaces with Nav2&#39;s NavigateToPose action server</span>
+<span class="sd">to execute autonomous navigation commands. Implements patrol route management and service_maquina-based</span>
+<span class="sd">goal interruption capabilities.</span>
+
+<span class="sd">License: GNU 3.0</span>
+<span class="sd">Copyright (c) 2025 Gymbrot Team</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">action_msgs.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoalStatus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geometry_msgs.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">PoseStamped</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gymbrot_interfaces.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">IrMaquina</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gymbrot_interfaces.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">LiberarRobotActividad</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nav2_msgs.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigateToPose</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActionClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>
+
+<div class="viewcode-block" id="TIMER_PERIOD_SEC_LIBERAR"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR">[documentos]</a><span class="n">TIMER_PERIOD_SEC_LIBERAR</span> <span class="o">=</span> <span class="mf">1.5</span></div>
+
+<div class="viewcode-block" id="feedback_period"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period">[documentos]</a><span class="n">feedback_period</span> <span class="o">=</span> <span class="mf">0.75</span></div>
+
+
+<div class="viewcode-block" id="NavigationNode"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode">[documentos]</a><span class="k">class</span><span class="w"> </span><span class="nc">NavigationNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ROS2 Node that handles navigation goals and executes them using Nav2&#39;s NavigateToPose action.</span>
+
+<span class="sd">    Implements a state machine for managing patrol routes and handling external goal requests through</span>
+<span class="sd">    a service interface. Maintains persistent connection to Nav2 action server and implements robust</span>
+<span class="sd">    error handling for navigation tasks.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        _action_nav (ActionClient): Client for the NavigateToPose action server</span>
+<span class="sd">        service_maquina (Service): Service server for handling external goal requests</span>
+<span class="sd">        robot_real (bool): Flag indicating simulation vs real robot operation</span>
+<span class="sd">        patrol_points (dict): Dictionary of predefined patrol points with string keys</span>
+<span class="sd">        current_patrol_goal_key (str): Current target key in patrol_points dictionary</span>
+<span class="sd">        current_goal (Point): Currently active navigation goal coordinates</span>
+<span class="sd">        last_sent_goal (Point): Last successfully sent goal coordinates</span>
+<span class="sd">        is_active (bool): Flag indicating active navigation action</span>
+<span class="sd">        epsilon (float): Tolerance threshold for position comparisons</span>
+<span class="sd">        route_points (list): Buffer for dynamic route planning (reserved for future use)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize navigation node with configuration parameters and service_maquina endpoints.</span>
+
+<span class="sd">        Sets up action client, service_maquina interface, and patrol point configuration based on</span>
+<span class="sd">        simulation/reality mode. Starts initial navigation sequence.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;navigation_node&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Cliente servicio navegar a maquina</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_action_nav</span> <span class="o">=</span> <span class="n">ActionClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NavigateToPose</span><span class="p">,</span> <span class="s1">&#39;/navigate_to_pose&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_maquina</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">IrMaquina</span><span class="p">,</span> <span class="s1">&#39;/ir_maquina&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_maquina_irq_callback</span><span class="p">)</span>
+        <span class="c1">#Liberar cliente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_liberar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">LiberarRobotActividad</span><span class="p">,</span><span class="s1">&#39;/liberar&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">servce_liberar_irq_callback</span><span class="p">)</span>
+
+        <span class="c1"># ESTADOS</span>
+        <span class="c1"># 0 en ruta, por defecto</span>
+        <span class="c1"># 1 yendo a maquina</span>
+        <span class="c1"># 2 en maquina, listo para ser liberado</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">liberar_listo</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Inits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer_liberar</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_result_future</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal_handle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_goal_future</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pending_req</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">declare_parameter</span><span class="p">(</span><span class="s1">&#39;robot_real&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot_real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s1">&#39;robot_real&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_parameter_value</span><span class="p">()</span><span class="o">.</span><span class="n">bool_value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">route_points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configure_patrol_points</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_goal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_configure_patrol_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure patrol points dictionary based on operation mode.</span>
+
+<span class="sd">        Populates different coordinate sets for simulation and real-world environments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot_real</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.0001</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;ESQUINA1&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;ESQUINA2&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;ESQUINA3&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;PESAS1&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=-</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;PESAS2&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=-</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;PESAS3&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=-</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;PESAS4&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="s2">&quot;PESAS5&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+            <span class="p">}</span>
+
+<div class="viewcode-block" id="NavigationNode.next_point_controller"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.next_point_controller">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">next_point_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Manage patrol route progression and goal updates.</span>
+
+<span class="sd">        Advances to next patrol point in sequence when current target is reached.</span>
+<span class="sd">        Implements circular buffer behavior for continuous patrol routes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_same_goal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span><span class="p">]):</span>
+            <span class="n">current_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span><span class="p">)</span>
+            <span class="n">next_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">next_idx</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Ruta a siguiente punto de patrulla actualizado&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Siguiente punto, robot yendo a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patrol_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_patrol_goal_key</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="NavigationNode.service_maquina_irq_callback"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.service_maquina_irq_callback">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">service_maquina_irq_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle asynchronous goal requests via service_maquina interface.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (IrMaquina.Request): Service request containing:</span>
+<span class="sd">                - x: float32 target x-coordinate</span>
+<span class="sd">                - y: float32 target y-coordinate</span>
+<span class="sd">            res (IrMaquina.Response): Service response containing:</span>
+<span class="sd">                - res: string status message</span>
+<span class="sd">                - codigo: int8 status code</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IrMaquina.Response: Immediate response indicating request acceptance status</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_goal</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">req</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_same_goal</span><span class="p">(</span><span class="n">new_goal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">):</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;Goal already active&quot;</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pending_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="n">new_goal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Async cancellation initiated&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goal_handle</span><span class="o">.</span><span class="n">cancel_goal_async</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">new_goal</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;New goal accepted&quot;</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;Request processing started&quot;</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="NavigationNode.servce_liberar_irq_callback"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.servce_liberar_irq_callback">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">servce_liberar_irq_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">,</span><span class="n">res</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;No listo para liberar&quot;</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">return</span> <span class="n">res</span>
+        <span class="k">elif</span> <span class="n">req</span><span class="o">.</span><span class="n">lib</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;Robot Liberado&quot;</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">liberar_listo</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">res</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;Sin Cambio&quot;</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">codigo</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="NavigationNode.send_goal"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.send_goal">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send navigation goal to action server with duplicate detection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (Point): Target coordinates in map frame</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If action server becomes unavailable during request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_same_goal</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_goal</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Objetivo idéntico al anterior, ignorando...&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">goal_msg</span> <span class="o">=</span> <span class="n">NavigateToPose</span><span class="o">.</span><span class="n">Goal</span><span class="p">()</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span> <span class="o">=</span> <span class="n">PoseStamped</span><span class="p">()</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s1">&#39;map&#39;</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">to_msg</span><span class="p">()</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">point</span>
+        <span class="n">goal_msg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_action_nav</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Enviando nuevo objetivo: X: </span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">, Y: </span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sent_goal</span> <span class="o">=</span> <span class="n">point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="n">point</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_goal_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_nav</span><span class="o">.</span><span class="n">send_goal_async</span><span class="p">(</span>
+            <span class="n">goal_msg</span><span class="p">,</span>
+            <span class="n">feedback_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feedback_callback</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_goal_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goal_response_callback</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_same_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal1</span><span class="p">,</span> <span class="n">goal2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare two positions with tolerance threshold.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            goal1 (Point): First position to compare</span>
+<span class="sd">            goal2 (Point): Second position to compare</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if positions are within epsilon tolerance in both axes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">(</span><span class="n">goal1</span><span class="p">,</span> <span class="n">goal2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">goal1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">goal2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">goal1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">goal2</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">))</span>
+
+<div class="viewcode-block" id="NavigationNode.goal_response_callback"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.goal_response_callback">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">goal_response_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle action server response to goal submission.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            future (concurrent.futures.Future): Async result container for goal acceptance status</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal_handle</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal_handle</span><span class="o">.</span><span class="n">accepted</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Objetivo rechazado&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Objetivo aceptado!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_result_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal_handle</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_result_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_result_callback</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NavigationNode.get_result_callback"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.get_result_callback">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_result_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process final navigation result and manage state transitions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            future (concurrent.futures.Future): Async result container containing navigation outcome</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Navegacion a punto terminada&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">GoalStatus</span><span class="o">.</span><span class="n">STATUS_SUCCEEDED</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Navigation succeeded to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_point_controller</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">status</span> <span class="ow">in</span> <span class="p">(</span><span class="n">GoalStatus</span><span class="o">.</span><span class="n">STATUS_CANCELED</span><span class="p">,</span> <span class="n">GoalStatus</span><span class="o">.</span><span class="n">STATUS_ABORTED</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">GoalStatus</span><span class="o">.</span><span class="n">STATUS_SUCCEEDED</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">esperar_liberar</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Navigation interrupted: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NavigationNode.feedback_callback"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.feedback_callback">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feedback_msg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process and display navigation feedback with rate limiting.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feedback_msg (NavigateToPose.Feedback): Navigation progress update containing:</span>
+<span class="sd">                - current_pose: geometry_msgs/PoseStamped current robot position</span>
+<span class="sd">                - distance_remaining: float32 remaining distance to goal</span>
+<span class="sd">                - navigation_time: builtin_interfaces/Duration elapsed navigation time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;last_feedback_time&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span> <span class="o">=</span> <span class="n">current_time</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span> <span class="o">=</span> <span class="n">current_time</span>
+
+        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span><span class="p">)</span><span class="o">.</span><span class="n">nanoseconds</span> <span class="o">*</span> <span class="mf">1e-9</span>
+        <span class="k">if</span> <span class="n">elapsed_time</span> <span class="o">&lt;</span> <span class="n">feedback_period</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback_time</span> <span class="o">=</span> <span class="n">current_time</span>
+        <span class="n">feedback</span> <span class="o">=</span> <span class="n">feedback_msg</span><span class="o">.</span><span class="n">feedback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span> <span class="o">=</span> <span class="n">feedback</span><span class="o">.</span><span class="n">current_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Progress: X: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">, Y: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pos</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> | &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;Remaining: </span><span class="si">{</span><span class="n">feedback</span><span class="o">.</span><span class="n">distance_remaining</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">m | &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;Duration: </span><span class="si">{</span><span class="n">feedback</span><span class="o">.</span><span class="n">navigation_time</span><span class="o">.</span><span class="n">sec</span><span class="si">}</span><span class="s1">s&#39;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="NavigationNode.esperar_liberar"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.esperar_liberar">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">esperar_liberar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait for liberation signal using a timer to avoid blocking.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Robot en espera&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">liberar_listo</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Reset flag</span>
+        <span class="c1"># Create a timer to periodically check the flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer_liberar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="n">TIMER_PERIOD_SEC_LIBERAR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_liberar</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NavigationNode.check_liberar"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.check_liberar">[documentos]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_liberar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Timer callback to check liberation status and proceed.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Robot esperando...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">liberar_listo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Robot liberado&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">destroy_timer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timer_liberar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">liberar_listo</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_point_controller</span><span class="p">()</span></div></div>
+
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.html#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main">[documentos]</a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main execution entry point for navigation node.</span>
+
+<span class="sd">    Handles node lifecycle management and graceful shutdown procedures.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args (list, optional): Command-line arguments. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">navigator</span> <span class="o">=</span> <span class="n">NavigationNode</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">navigator</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">navigator</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Navigation node shutting down...&#39;</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">navigator</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Gymbrot Team.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

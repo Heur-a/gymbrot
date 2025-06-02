@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 # Configuración
 DOCS_PORT=8000
 DOCS_DIR="web"
-REQUIREMENTS="requirements-docs.txt"
+REQUIREMENTS="src/gymbrot/doc/requirements-docs.txt"
 
 check_dependencies() {
     local missing=0
@@ -32,23 +32,24 @@ install_deps() {
 
 setup_docs() {
     echo -e "${YELLOW}Configurando documentación...${NC}"
-    make setup
+    make -C src/gymbrot/doc clean
+    make -C src/gymbrot/doc setup
     cp _static/* "$DOCS_DIR/_static/" 2>/dev/null || :
 }
 
 build_docs() {
     echo -e "${YELLOW}Construyendo documentación...${NC}"
-    make html
+    make -C src/gymbrot/doc html
 }
 
 serve_docs() {
     echo -e "${GREEN}Iniciando servidor en http://localhost:$DOCS_PORT${NC}"
-    make livehtml DOCS_PORT=$DOCS_PORT
+    make -C src/gymbrot/doc livehtml DOCS_PORT=$DOCS_PORT
 }
 
 clean_docs() {
     echo -e "${YELLOW}Limpiando builds...${NC}"
-    make clean
+    make -C src/gymbrot/doc clean
 }
 
 deploy_docs() {

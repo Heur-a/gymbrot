@@ -1,0 +1,60 @@
+:py:mod:`gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.initial_pose_pub`
+====================================================================================
+
+.. py:module:: gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.initial_pose_pub
+
+.. autoapi-nested-parse::
+
+   ROS2 Node for publishing initial robot pose estimation.
+
+   This node publishes a single initial pose estimate for robot localization systems
+   like AMCL (Adaptive Monte Carlo Localization).
+
+   License: GNU 3.0
+   Copyright (c) 2023 Your Name/Organization
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.initial_pose_pub.Publisher
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.initial_pose_pub.main
+
+
+
+.. py:class:: Publisher
+
+
+   Bases: :py:obj:`rclpy.node.Node`
+
+   ROS2 Node that publishes a single initial pose estimate for robot localization.
+
+   .. attribute:: publisher_
+
+      ROS2 publisher for initial pose estimates
+
+      :type: Publisher
+
+
+.. py:function:: main(args: list = None) -> None
+
+   Main entry point for the initial pose publisher node.
+
+   :param args: Command-line arguments. Defaults to None.
+   :type args: list, optional
+
+
