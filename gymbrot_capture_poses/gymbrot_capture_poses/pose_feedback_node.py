@@ -2,8 +2,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from std_msgs.msg import String
-
 import cv2
 import mxnet as mx
 import gluoncv
@@ -62,9 +60,30 @@ def process_frame(frame, detector, estimator, ctx):
     pred_coords, confidence = select_best_person(pred_coords, confidence)
 
     return pred_coords, confidence, (height, width)
-def extraer_features(coords_array):
-    # coords_array: (17, 2) numpy array
-    pose_feats = []
+def draw_pose(frame, coords, conf, threshold=0.3):
+    limb_pairs = [
+        (5, 7), (7, 9),     # Left arm
+        (6, 8), (8, 10),    # Right arm
+        (5, 6),             # Shoulders
+        (11, 13), (13, 15), # Left leg
+        (12, 14), (14, 16), # Right leg
+        (11, 12),           # Hips
+        (5, 11), (6, 12),   # Torso
+        (0, 1), (1, 2), (2, 3), (3, 4)  # Head
+    ]
+
+    for i, (x, y) in enumerate(coords):
+        if conf[i] > threshold:
+            cv2.circle(frame, (int(x), int(y)), 4, (0, 255, 0), -1)
+
+    for pair in limb_pairs:
+        i, j = pair
+        if conf[i] > threshold and conf[j] > threshold:
+            pt1 = tuple(map(int, coords[i]))
+            pt2 = tuple(map(int, coords[j]))
+            cv2.line(frame, pt1, pt2, (255, 0, 0), 2)
+
+    return frame
 
 def calculate_leg_angles(coords, conf):
     """
@@ -408,7 +427,8 @@ def load_keypoints_dataset(csv_path):
 class PoseComparisonNode(Node):
     def __init__(self):
         super().__init__('quadriceps_extension_classifier')
-
+        self.pose_image_pub = self.create_publisher(Image, '/pose', qos_profile_sensor_data)
+        self.bridge = CvBridge()
         self.bridge = CvBridge()
         self.ctx = mx.cpu()
 
@@ -416,7 +436,7 @@ class PoseComparisonNode(Node):
         self.detector = get_model('ssd_512_mobilenet1.0_coco', pretrained=True, ctx=self.ctx)
         self.detector.reset_class(classes=['person'], reuse_weights={'person': 'person'})
 
-        self.get_logger().info("🔄 Cargando modelo de pose...")
+        self.get_logger().info("Cargando modelo de pose...")
         self.estimator = get_model('alpha_pose_resnet101_v1b_coco', pretrained=True, ctx=self.ctx)
 
         csv_path = 'src/gymbrot/rosweb/assets/dataset_ejercicios/csv_output/pose_keypoints_dataset.csv'
@@ -443,14 +463,14 @@ class PoseComparisonNode(Node):
             qos_profile_sensor_data,
         )
         self.pose_feedback_pub = self.create_publisher(String, '/pose_feedback', 10)
-        self.pose_image_pub = self.create_publisher(Image, '/pose', 10)
+        self.image_pub = self.create_publisher(Image, '/pose', qos_profile_sensor_data)
         self.bridge = CvBridge()
 
     def image_callback(self, msg):
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         except CvBridgeError as e:
-            self.get_logger().error(f"❌ Error al convertir imagen: {e}")
+            self.get_logger().error(f"Error al convertir imagen ROS a OpenCV: {e}")
             return
 
         self.process_quadriceps_exercise(frame)
@@ -526,6 +546,15 @@ class PoseComparisonNode(Node):
             self.pose_image_pub.publish(image_msg)
         except Exception as e:
             self.get_logger().error(f"Error al convertir/publicar la imagen: {e}")
+            # Si hay coordenadas, dibujar la pose en el frame
+        if coords is not None:
+            frame_with_pose = draw_pose(frame.copy(), coords, conf)
+            try:
+                image_msg = self.bridge.cv2_to_imgmsg(frame_with_pose, encoding="bgr8")
+                self.image_pub.publish(image_msg)
+            except CvBridgeError as e:
+                self.get_logger().error(f"Error al convertir imagen: {e}")
+
 
 def main(args=None):
     rclpy.init(args=args)

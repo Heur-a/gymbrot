@@ -14,7 +14,7 @@ class ImagePublisher(Node):
 
         # Ruta configurable (puedes cambiar el archivo aquí)
         package_path = get_package_share_directory('gymbrot_capture_poses')
-        file_path = os.path.join(package_path, 'resources', 'mid_071.png')  # Cambia a .png, .jpg, etc. si quieres usar imagen
+        file_path = os.path.join(package_path, 'resources', 'video_referencia.mp4')  # Cambia a .png, .jpg, etc. si quieres usar imagen
 
         self.get_logger().info(f"📂 Archivo de entrada: {file_path}")
 
