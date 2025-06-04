@@ -1,0 +1,23 @@
+[0.791s] Invoking command in '/home/marcos04/turtlebot3_ws/src/gymbrot/gymbrot_capture_poses': PYTHONPATH=/home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/gymbrot_capture_poses build --build-base /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build install --record /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/install.log --single-version-externally-managed install_data
+[1.041s] running egg_info
+[1.041s] writing ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/PKG-INFO
+[1.041s] writing dependency_links to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/dependency_links.txt
+[1.041s] writing entry points to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/entry_points.txt
+[1.041s] writing requirements to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/requires.txt
+[1.041s] writing top-level names to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/top_level.txt
+[1.074s] reading manifest file '../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/SOURCES.txt'
+[1.075s] writing manifest file '../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/SOURCES.txt'
+[1.075s] running build
+[1.075s] running build_py
+[1.075s] copying gymbrot_capture_poses/key_poses.py -> /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build/lib/gymbrot_capture_poses
+[1.075s] running install
+[1.076s] running install_lib
+[1.078s] copying /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build/lib/gymbrot_capture_poses/key_poses.py -> /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses
+[1.082s] byte-compiling /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses/key_poses.py to key_poses.cpython-38.pyc
+[1.082s] running install_data
+[1.082s] running install_egg_info
+[1.085s] removing '/home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses-0.0.0-py3.8.egg-info' (and everything under it)
+[1.085s] Copying ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info to /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses-0.0.0-py3.8.egg-info
+[1.086s] running install_scripts
+[1.105s] writing list of installed files to '/home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/install.log'
+[1.141s] Invoked command in '/home/marcos04/turtlebot3_ws/src/gymbrot/gymbrot_capture_poses' returned '0': PYTHONPATH=/home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/gymbrot_capture_poses build --build-base /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build install --record /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/install.log --single-version-externally-managed install_data

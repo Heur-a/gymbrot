@@ -1,0 +1,14 @@
+:py:mod:`gymbrot.gymbrot_point_nav_system.setup`
+================================================
+
+.. py:module:: gymbrot.gymbrot_point_nav_system.setup
+
+
+Module Contents
+---------------
+
+.. py:data:: package_name
+   :value: 'gymbrot_point_nav_system'
+
+   
+

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 12-05-2025 a las 18:18:17
+-- Tiempo de generación: 26-05-2025 a las 20:25:42
 -- Versión del servidor: 10.3.39-MariaDB-0ubuntu0.20.04.2
 -- Versión de PHP: 7.4.3-4ubuntu2.29
 
@@ -18,6 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+--
 -- Base de datos: `gymbrot`
 --
 CREATE DATABASE IF NOT EXISTS gymbrot;
@@ -94,9 +95,9 @@ CREATE TABLE `machines` (
 --
 
 INSERT INTO `machines` (`id`, `locX`, `locY`, `orientation`) VALUES
-(1, 12.5, 8.3, 90),
-(2, 15, 3.7, 180),
-(3, 7.2, 10.1, 45);
+(1, 5, 65, 90),
+(2, 5, 49, 180),
+(3, 5, 33, 45);
 
 -- --------------------------------------------------------
 
@@ -208,7 +209,22 @@ INSERT INTO `user_activities` (`id`, `user_id`, `activity_type`, `description`, 
 (3, 2, 'logout', 'Usuario cerró sesión', '2025-05-12 16:56:32', NULL, NULL),
 (4, 2, 'profile_update', 'Usuario actualizó datos personales', '2025-05-12 16:56:32', NULL, NULL),
 (5, 2, 'robot_interaction', 'Usuario configuró parámetros del robot', '2025-05-12 16:56:32', 1, NULL),
-(6, 1, 'login', 'Administrador accedió al panel', '2025-05-12 16:56:32', NULL, NULL);
+(6, 1, 'login', 'Administrador accedió al panel', '2025-05-12 16:56:32', NULL, NULL),
+(17, 2, 'exercise', 'Completó Sentadillas', '2025-05-26 20:03:11', 3, 3),
+(18, 2, 'exercise', 'Rutina de Press Banca', '2025-05-25 20:03:11', 1, 1),
+(19, 1, 'exercise', 'Ejercicio de prueba admin', '2025-05-26 18:03:11', 1, 4),
+(20, 2, 'exercise', 'Sesión de Yoga', '2025-05-26 17:03:11', 2, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `user_exercise_stats`
+--
+
+CREATE TABLE `user_exercise_stats` (
+  `user_id` int(11) NOT NULL,
+  `exercise_count` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -291,6 +307,12 @@ ALTER TABLE `user_activities`
   ADD KEY `fk_user_activities_exercise` (`exercise_id`);
 
 --
+-- Indices de la tabla `user_exercise_stats`
+--
+ALTER TABLE `user_exercise_stats`
+  ADD PRIMARY KEY (`user_id`);
+
+--
 -- Indices de la tabla `user_type`
 --
 ALTER TABLE `user_type`
@@ -346,7 +368,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `user_activities`
 --
 ALTER TABLE `user_activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `user_type`
@@ -384,6 +406,12 @@ ALTER TABLE `users`
 ALTER TABLE `user_activities`
   ADD CONSTRAINT `fk_user_activities_exercise` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_user_activities_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `user_exercise_stats`
+--
+ALTER TABLE `user_exercise_stats`
+  ADD CONSTRAINT `user_exercise_stats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

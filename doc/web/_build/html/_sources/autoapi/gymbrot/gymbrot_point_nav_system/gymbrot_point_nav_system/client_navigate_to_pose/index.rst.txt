@@ -1,0 +1,215 @@
+:py:mod:`gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose`
+===========================================================================================
+
+.. py:module:: gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose
+
+.. autoapi-nested-parse::
+
+   ROS2 Navigation Node for handling goal requests and executing navigation actions.
+
+   This node subscribes to location goals and interfaces with Nav2's NavigateToPose action server
+   to execute autonomous navigation commands. Implements patrol route management and service_maquina-based
+   goal interruption capabilities.
+
+   License: GNU 3.0
+   Copyright (c) 2025 Gymbrot Team
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR
+   gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period
+
+
+.. py:data:: TIMER_PERIOD_SEC_LIBERAR
+   :value: 1.5
+
+   
+
+.. py:data:: feedback_period
+   :value: 0.75
+
+   
+
+.. py:class:: NavigationNode
+
+
+   Bases: :py:obj:`rclpy.node.Node`
+
+   ROS2 Node that handles navigation goals and executes them using Nav2's NavigateToPose action.
+
+   Implements a state machine for managing patrol routes and handling external goal requests through
+   a service interface. Maintains persistent connection to Nav2 action server and implements robust
+   error handling for navigation tasks.
+
+   .. attribute:: _action_nav
+
+      Client for the NavigateToPose action server
+
+      :type: ActionClient
+
+   .. attribute:: service_maquina
+
+      Service server for handling external goal requests
+
+      :type: Service
+
+   .. attribute:: robot_real
+
+      Flag indicating simulation vs real robot operation
+
+      :type: bool
+
+   .. attribute:: patrol_points
+
+      Dictionary of predefined patrol points with string keys
+
+      :type: dict
+
+   .. attribute:: current_patrol_goal_key
+
+      Current target key in patrol_points dictionary
+
+      :type: str
+
+   .. attribute:: current_goal
+
+      Currently active navigation goal coordinates
+
+      :type: Point
+
+   .. attribute:: last_sent_goal
+
+      Last successfully sent goal coordinates
+
+      :type: Point
+
+   .. attribute:: is_active
+
+      Flag indicating active navigation action
+
+      :type: bool
+
+   .. attribute:: epsilon
+
+      Tolerance threshold for position comparisons
+
+      :type: float
+
+   .. attribute:: route_points
+
+      Buffer for dynamic route planning (reserved for future use)
+
+      :type: list
+
+   .. py:method:: next_point_controller()
+
+      Manage patrol route progression and goal updates.
+
+      Advances to next patrol point in sequence when current target is reached.
+      Implements circular buffer behavior for continuous patrol routes.
+
+
+   .. py:method:: service_maquina_irq_callback(req, res)
+
+      Handle asynchronous goal requests via service_maquina interface.
+
+      :param req: Service request containing:
+                  - x: float32 target x-coordinate
+                  - y: float32 target y-coordinate
+      :type req: IrMaquina.Request
+      :param res: Service response containing:
+                  - res: string status message
+                  - codigo: int8 status code
+      :type res: IrMaquina.Response
+
+      :returns: Immediate response indicating request acceptance status
+      :rtype: IrMaquina.Response
+
+
+   .. py:method:: servce_liberar_irq_callback(req, res)
+
+
+   .. py:method:: send_goal(point)
+
+      Send navigation goal to action server with duplicate detection.
+
+      :param point: Target coordinates in map frame
+      :type point: Point
+
+      :raises RuntimeError: If action server becomes unavailable during request
+
+
+   .. py:method:: goal_response_callback(future)
+
+      Handle action server response to goal submission.
+
+      :param future: Async result container for goal acceptance status
+      :type future: concurrent.futures.Future
+
+
+   .. py:method:: get_result_callback(future)
+
+      Process final navigation result and manage state transitions.
+
+      :param future: Async result container containing navigation outcome
+      :type future: concurrent.futures.Future
+
+
+   .. py:method:: feedback_callback(feedback_msg)
+
+      Process and display navigation feedback with rate limiting.
+
+      :param feedback_msg: Navigation progress update containing:
+                           - current_pose: geometry_msgs/PoseStamped current robot position
+                           - distance_remaining: float32 remaining distance to goal
+                           - navigation_time: builtin_interfaces/Duration elapsed navigation time
+      :type feedback_msg: NavigateToPose.Feedback
+
+
+   .. py:method:: esperar_liberar()
+
+      Wait for liberation signal using a timer to avoid blocking.
+
+
+   .. py:method:: check_liberar()
+
+      Timer callback to check liberation status and proceed.
+
+
+
+.. py:function:: main(args=None)
+
+   Main execution entry point for navigation node.
+
+   Handles node lifecycle management and graceful shutdown procedures.
+
+   :param args: Command-line arguments. Defaults to None.
+   :type args: list, optional
+
+

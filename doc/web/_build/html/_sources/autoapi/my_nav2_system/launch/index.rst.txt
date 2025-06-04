@@ -1,0 +1,22 @@
+:py:mod:`my_nav2_system.launch`
+===============================
+
+.. py:module:: my_nav2_system.launch
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   my_nav2_system.launch.generate_launch_description
+
+
+
+.. py:function:: generate_launch_description()
+
+

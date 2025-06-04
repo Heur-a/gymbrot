@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose &mdash; documentación de Gymbrot - </title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=0828dd0a"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../../_static/translations.js?v=efdbd0b9"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Gymbrot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/autoapi/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose/index.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose">
+<span id="gymbrot-gymbrot-point-nav-system-gymbrot-point-nav-system-client-navigate-to-pose"></span><h1><a class="reference internal" href="#module-gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose" title="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose</span></code></a><a class="headerlink" href="#module-gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose" title="Enlace permanente a este encabezado"></a></h1>
+<p>ROS2 Navigation Node for handling goal requests and executing navigation actions.</p>
+<p>This node subscribes to location goals and interfaces with Nav2’s NavigateToPose action server
+to execute autonomous navigation commands. Implements patrol route management and service_maquina-based
+goal interruption capabilities.</p>
+<p>License: GNU 3.0
+Copyright (c) 2025 Gymbrot Team</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Enlace permanente a este encabezado"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Enlace permanente a este encabezado"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode" title="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NavigationNode</span></code></a></p></td>
+<td><p>ROS2 Node that handles navigation goals and executes them using Nav2's NavigateToPose action.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Enlace permanente a este encabezado"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main" title="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>([args])</p></td>
+<td><p>Main execution entry point for navigation node.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Enlace permanente a este encabezado"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR" title="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIMER_PERIOD_SEC_LIBERAR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period" title="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feedback_period</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR">
+<span class="sig-prename descclassname"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.</span></span><span class="sig-name descname"><span class="pre">TIMER_PERIOD_SEC_LIBERAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.5</span></em><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#TIMER_PERIOD_SEC_LIBERAR"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.TIMER_PERIOD_SEC_LIBERAR" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period">
+<span class="sig-prename descclassname"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.</span></span><span class="sig-name descname"><span class="pre">feedback_period</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.75</span></em><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#feedback_period"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.feedback_period" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.</span></span><span class="sig-name descname"><span class="pre">NavigationNode</span></span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">rclpy.node.Node</span></code></p>
+<p>ROS2 Node that handles navigation goals and executes them using Nav2’s NavigateToPose action.</p>
+<p>Implements a state machine for managing patrol routes and handling external goal requests through
+a service interface. Maintains persistent connection to Nav2 action server and implements robust
+error handling for navigation tasks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode._action_nav">
+<span class="sig-name descname"><span class="pre">_action_nav</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode._action_nav" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Client for the NavigateToPose action server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ActionClient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.service_maquina">
+<span class="sig-name descname"><span class="pre">service_maquina</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.service_maquina" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Service server for handling external goal requests</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Service</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.robot_real">
+<span class="sig-name descname"><span class="pre">robot_real</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.robot_real" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Flag indicating simulation vs real robot operation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(en Python versión 3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.patrol_points">
+<span class="sig-name descname"><span class="pre">patrol_points</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.patrol_points" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Dictionary of predefined patrol points with string keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(en Python versión 3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.current_patrol_goal_key">
+<span class="sig-name descname"><span class="pre">current_patrol_goal_key</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.current_patrol_goal_key" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Current target key in patrol_points dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(en Python versión 3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.current_goal">
+<span class="sig-name descname"><span class="pre">current_goal</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.current_goal" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Currently active navigation goal coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.last_sent_goal">
+<span class="sig-name descname"><span class="pre">last_sent_goal</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.last_sent_goal" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Last successfully sent goal coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.is_active" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Flag indicating active navigation action</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(en Python versión 3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.epsilon">
+<span class="sig-name descname"><span class="pre">epsilon</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.epsilon" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Tolerance threshold for position comparisons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(en Python versión 3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.route_points">
+<span class="sig-name descname"><span class="pre">route_points</span></span><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.route_points" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Buffer for dynamic route planning (reserved for future use)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(en Python versión 3.13)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.next_point_controller">
+<span class="sig-name descname"><span class="pre">next_point_controller</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.next_point_controller"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.next_point_controller" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Manage patrol route progression and goal updates.</p>
+<p>Advances to next patrol point in sequence when current target is reached.
+Implements circular buffer behavior for continuous patrol routes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.service_maquina_irq_callback">
+<span class="sig-name descname"><span class="pre">service_maquina_irq_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.service_maquina_irq_callback"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.service_maquina_irq_callback" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Handle asynchronous goal requests via service_maquina interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req</strong> (<em>IrMaquina.Request</em>) – Service request containing:
+- x: float32 target x-coordinate
+- y: float32 target y-coordinate</p></li>
+<li><p><strong>res</strong> (<em>IrMaquina.Response</em>) – Service response containing:
+- res: string status message
+- codigo: int8 status code</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Immediate response indicating request acceptance status</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IrMaquina.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.servce_liberar_irq_callback">
+<span class="sig-name descname"><span class="pre">servce_liberar_irq_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.servce_liberar_irq_callback"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.servce_liberar_irq_callback" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.send_goal">
+<span class="sig-name descname"><span class="pre">send_goal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.send_goal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.send_goal" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Send navigation goal to action server with duplicate detection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> (<em>Point</em>) – Target coordinates in map frame</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(en Python versión 3.13)"><strong>RuntimeError</strong></a> – If action server becomes unavailable during request</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.goal_response_callback">
+<span class="sig-name descname"><span class="pre">goal_response_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.goal_response_callback"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.goal_response_callback" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Handle action server response to goal submission.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>future</strong> (<a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Future" title="(en Python versión 3.13)"><em>concurrent.futures.Future</em></a>) – Async result container for goal acceptance status</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.get_result_callback">
+<span class="sig-name descname"><span class="pre">get_result_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.get_result_callback"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.get_result_callback" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Process final navigation result and manage state transitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>future</strong> (<a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Future" title="(en Python versión 3.13)"><em>concurrent.futures.Future</em></a>) – Async result container containing navigation outcome</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.feedback_callback">
+<span class="sig-name descname"><span class="pre">feedback_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feedback_msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.feedback_callback"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.feedback_callback" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Process and display navigation feedback with rate limiting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feedback_msg</strong> (<em>NavigateToPose.Feedback</em>) – Navigation progress update containing:
+- current_pose: geometry_msgs/PoseStamped current robot position
+- distance_remaining: float32 remaining distance to goal
+- navigation_time: builtin_interfaces/Duration elapsed navigation time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.esperar_liberar">
+<span class="sig-name descname"><span class="pre">esperar_liberar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.esperar_liberar"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.esperar_liberar" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Wait for liberation signal using a timer to avoid blocking.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.check_liberar">
+<span class="sig-name descname"><span class="pre">check_liberar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#NavigationNode.check_liberar"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.NavigationNode.check_liberar" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Timer callback to check liberation status and proceed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main">
+<span class="sig-prename descclassname"><span class="pre">gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gymbrot/gymbrot_point_nav_system/gymbrot_point_nav_system/client_navigate_to_pose.html#main"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#gymbrot.gymbrot_point_nav_system.gymbrot_point_nav_system.client_navigate_to_pose.main" title="Enlazar permanentemente con esta definición"></a></dt>
+<dd><p>Main execution entry point for navigation node.</p>
+<p>Handles node lifecycle management and graceful shutdown procedures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(en Python versión 3.13)"><em>list</em></a><em>, </em><em>optional</em>) – Command-line arguments. Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Gymbrot Team.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+running egg_info
+writing ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/PKG-INFO
+writing dependency_links to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/dependency_links.txt
+writing entry points to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/entry_points.txt
+writing requirements to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/requires.txt
+writing top-level names to ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/top_level.txt
+reading manifest file '../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/SOURCES.txt'
+writing manifest file '../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info/SOURCES.txt'
+running build
+running build_py
+copying gymbrot_capture_poses/key_poses.py -> /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build/lib/gymbrot_capture_poses
+running install
+running install_lib
+copying /home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/build/lib/gymbrot_capture_poses/key_poses.py -> /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses
+byte-compiling /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses/key_poses.py to key_poses.cpython-38.pyc
+running install_data
+running install_egg_info
+removing '/home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses-0.0.0-py3.8.egg-info' (and everything under it)
+Copying ../build/gymbrot_capture_poses/gymbrot_capture_poses.egg-info to /home/marcos04/turtlebot3_ws/src/gymbrot/install/gymbrot_capture_poses/lib/python3.8/site-packages/gymbrot_capture_poses-0.0.0-py3.8.egg-info
+running install_scripts
+writing list of installed files to '/home/marcos04/turtlebot3_ws/src/gymbrot/build/gymbrot_capture_poses/install.log'

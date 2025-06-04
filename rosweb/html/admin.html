@@ -50,6 +50,69 @@
             </div>
         </div>
 
+        <!-- Gráficas de actividades -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Gráfica de pastel de actividades -->
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-6">
+                <h2 class="text-xl font-bold text-[#727272] mb-4">Distribución de Actividades</h2>
+                <div class="relative h-96">
+                    <canvas id="activityPieChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Nueva gráfica de barras -->
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-6">
+                <h2 class="text-xl font-bold text-[#727272] mb-4">Ejercicios por Usuario</h2>
+                <div class="relative h-96">
+                    <canvas id="userExercisesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de estadísticas de ejercicios -->
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6">
+            <h2 class="text-xl font-bold text-[#727272] mb-4">Estadísticas de Ejercicios</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-2">Ejercicio</th>
+                            <th class="text-left py-2">Veces Realizado</th>
+                            <th class="text-left py-2">Última Realización</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercises-stats-body">
+                        <tr class="border-b">
+                            <td class="py-2 text-gray-400">Cargando...</td>
+                            <td class="py-2 text-gray-400">Cargando...</td>
+                            <td class="py-2 text-gray-400">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabla de ejercicios más realizados -->
+        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6">
+            <h2 class="text-xl font-bold text-[#727272] mb-4">Ejercicios más realizados</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-2">Ejercicio</th>
+                            <th class="text-left py-2">Veces realizado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercise-table-body">
+                        <tr class="border-b">
+                            <td class="py-2 text-gray-400">Cargando...</td>
+                            <td class="py-2 text-gray-400">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Histórico de Actividades de Usuarios -->
         <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
@@ -194,6 +257,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/admin.js"></script>
     <script src="../js/logout-popup.js"></script>
     <script src="../js/conexion.js"></script>
