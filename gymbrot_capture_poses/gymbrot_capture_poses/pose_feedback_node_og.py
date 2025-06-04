@@ -11,9 +11,6 @@ from gluoncv.data.transforms.pose import detector_to_alpha_pose, heatmap_to_coor
 import numpy as np
 import os
 import pandas as pd
-from std_msgs.msg import String
-from rclpy.qos import qos_profile_sensor_data
-
 
 cv2 = try_import_cv2()
 
@@ -60,30 +57,6 @@ def process_frame(frame, detector, estimator, ctx):
     pred_coords, confidence = select_best_person(pred_coords, confidence)
 
     return pred_coords, confidence, (height, width)
-def draw_pose(frame, coords, conf, threshold=0.3):
-    limb_pairs = [
-        (5, 7), (7, 9),     # Left arm
-        (6, 8), (8, 10),    # Right arm
-        (5, 6),             # Shoulders
-        (11, 13), (13, 15), # Left leg
-        (12, 14), (14, 16), # Right leg
-        (11, 12),           # Hips
-        (5, 11), (6, 12),   # Torso
-        (0, 1), (1, 2), (2, 3), (3, 4)  # Head
-    ]
-
-    for i, (x, y) in enumerate(coords):
-        if conf[i] > threshold:
-            cv2.circle(frame, (int(x), int(y)), 4, (0, 255, 0), -1)
-
-    for pair in limb_pairs:
-        i, j = pair
-        if conf[i] > threshold and conf[j] > threshold:
-            pt1 = tuple(map(int, coords[i]))
-            pt2 = tuple(map(int, coords[j]))
-            cv2.line(frame, pt1, pt2, (255, 0, 0), 2)
-
-    return frame
 
 def calculate_leg_angles(coords, conf):
     """
@@ -427,8 +400,7 @@ def load_keypoints_dataset(csv_path):
 class PoseComparisonNode(Node):
     def __init__(self):
         super().__init__('quadriceps_extension_classifier')
-        self.pose_image_pub = self.create_publisher(Image, '/pose', qos_profile_sensor_data)
-        self.bridge = CvBridge()
+
         self.bridge = CvBridge()
         self.ctx = mx.cpu()
 
@@ -460,11 +432,8 @@ class PoseComparisonNode(Node):
             Image,
             '/image',
             self.image_callback,
-            qos_profile_sensor_data,
+            10
         )
-        self.pose_feedback_pub = self.create_publisher(String, '/pose_feedback', 10)
-        self.image_pub = self.create_publisher(Image, '/pose', qos_profile_sensor_data)
-        self.bridge = CvBridge()
 
     def image_callback(self, msg):
         try:
@@ -477,8 +446,7 @@ class PoseComparisonNode(Node):
 
     def process_quadriceps_exercise(self, frame):
         coords, conf, shape = process_frame(frame, self.detector, self.estimator, self.ctx)
-        # Iniciar la variable desde el principio
-        full_feedback = " "
+        
         if coords is None:
             self.get_logger().info("No se detectó persona en la imagen")
             return
@@ -508,7 +476,7 @@ class PoseComparisonNode(Node):
                     if phase_angle == "inicio" and self.last_phase == "final":
                         self.repetition_count += 1
                     self.last_phase = phase_angle
-        full_feedback += str(phase_angle)
+
         # RESULTADO
         self.get_logger().info("\n" + "=" * 60)
         self.get_logger().info("ANÁLISIS DE EXTENSIÓN DE CUÁDRICEPS:")
@@ -522,39 +490,17 @@ class PoseComparisonNode(Node):
                 self.get_logger().info(f"Comparación con dataset: {best_dataset_label} ({best_dataset_sim*100:.1f}%)")
         
         # Evaluación de calidad
-        if phase_angle and conf_angle > 0.5:
+        if phase_angle and conf_angle > 0.5:  
             if conf_angle > 0.9:
-                calidad = "✅ ¡Excelente ejecución!"
+                self.get_logger().info("✅ ¡Excelente ejecución!")
             elif conf_angle > 0.85:
-                calidad = "✅ ¡Buena ejecución!"
+                self.get_logger().info("✅ ¡Buena ejecución!")
             elif conf_angle > 0.65:
-                calidad = "⚠️  Ejecución aceptable"
+                self.get_logger().info("⚠️  Ejecución aceptable")
             else:
-                calidad = "⚠️  Necesita mejorar la técnica"
-            full_feedback += calidad + "\n"
-        else:
-            calidad = "Confianza insuficiente para evaluación"
-        self.get_logger().info(full_feedback)
-
-    # Publicar todo el mensaje en /pose_feedback
-        feedback_msg = String()
-        feedback_msg.data = full_feedback
-        self.pose_feedback_pub.publish(feedback_msg)
-        # Publicar imagen en /pose
-        try:
-            image_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
-            self.pose_image_pub.publish(image_msg)
-        except Exception as e:
-            self.get_logger().error(f"Error al convertir/publicar la imagen: {e}")
-            # Si hay coordenadas, dibujar la pose en el frame
-        if coords is not None:
-            frame_with_pose = draw_pose(frame.copy(), coords, conf)
-            try:
-                image_msg = self.bridge.cv2_to_imgmsg(frame_with_pose, encoding="bgr8")
-                self.image_pub.publish(image_msg)
-            except CvBridgeError as e:
-                self.get_logger().error(f"Error al convertir imagen: {e}")
-
+                self.get_logger().info("⚠️  Necesita mejorar la técnica")
+        
+        self.get_logger().info("=" * 60 + "\n")
 
 def main(args=None):
     rclpy.init(args=args)

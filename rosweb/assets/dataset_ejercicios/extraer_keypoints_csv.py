@@ -7,10 +7,9 @@ import pandas as pd
 
 # Configuración
 input_folder = os.path.expanduser('~/turtlebot3_ws/src/gymbrot/rosweb/assets/dataset_ejercicios')
-output_json_folder = './keypoints_json'
-output_csv_folder = './csv_output'  # Nueva carpeta para CSV (opcional)
+output_json_folder = 'keypoints_json'
+output_csv_folder = 'csv_output'
 
-# Crear carpetas de salida antes de empezar
 os.makedirs(output_json_folder, exist_ok=True)
 os.makedirs(output_csv_folder, exist_ok=True)
 
@@ -27,10 +26,8 @@ def infer_label(filename):
         return 'final'
     return 'desconocido'
 
-# Dataset CSV opcional
 dataset_rows = []
 
-# Recorrer subcarpetas (inicio, medio, final)
 for subfolder in ['inicio', 'medio', 'final']:
     folder_path = os.path.join(input_folder, subfolder)
     if not os.path.exists(folder_path):
@@ -55,10 +52,12 @@ for subfolder in ['inicio', 'medio', 'final']:
             continue
 
         landmarks = results.pose_landmarks.landmark
-        keypoints = [[lm.x, lm.y] for lm in landmarks]  # O usa lm.visibility si quieres
+
+        # ✅ Usar solo los primeros 17 keypoints (como COCO/AlphaPose)
+        keypoints = [[lm.x, lm.y] for lm in landmarks[:17]]
         flat_keypoints = np.array(keypoints).flatten().tolist()
 
-        # Guardar JSON estilo AlphaPose/OpenPose
+        # Guardar JSON estilo OpenPose
         out_data = [{
             'file': fname,
             'label': subfolder,
@@ -70,7 +69,7 @@ for subfolder in ['inicio', 'medio', 'final']:
         with open(json_path, 'w') as f:
             json.dump(out_data, f)
 
-        # También guardar para el CSV final
+        # Para el CSV
         row = {'filename': fname, 'label': subfolder}
         for i, val in enumerate(flat_keypoints):
             row[f'kp_{i}'] = val
@@ -78,7 +77,7 @@ for subfolder in ['inicio', 'medio', 'final']:
 
         print(f"✅ Procesado: {fname}")
 
-# Guardar CSV final dentro de la carpeta CSV creada
+# Guardar CSV final
 csv_path = os.path.join(output_csv_folder, 'pose_keypoints_dataset.csv')
 df = pd.DataFrame(dataset_rows)
 df.to_csv(csv_path, index=False)
