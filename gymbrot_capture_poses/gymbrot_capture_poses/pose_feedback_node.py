@@ -438,6 +438,8 @@ class PoseComparisonNode(Node):
             qos_profile_sensor_data,
         )
         self.pose_feedback_pub = self.create_publisher(String, '/pose_feedback', 10)
+        self.pose_image_pub = self.create_publisher(Image, '/pose', 10)
+        self.bridge = CvBridge()
 
     def image_callback(self, msg):
         try:
@@ -513,6 +515,12 @@ class PoseComparisonNode(Node):
         feedback_msg = String()
         feedback_msg.data = full_feedback
         self.pose_feedback_pub.publish(feedback_msg)
+        # Publicar imagen en /pose
+        try:
+            image_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            self.pose_image_pub.publish(image_msg)
+        except Exception as e:
+            self.get_logger().error(f"Error al convertir/publicar la imagen: {e}")
 
 def main(args=None):
     rclpy.init(args=args)

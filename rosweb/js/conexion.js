@@ -1,5 +1,5 @@
 // Tema de ROS donde se publica la imagen procesada (por ejemplo, template matching o detección)
-const cameraTopic = "/camera/processed_image";
+const cameraTopic = "/image";
 
 // URL del servidor web_video_server que sirve la imagen como MJPEG stream
 const cameraURL = `http://localhost:8080/stream?topic=${cameraTopic}`;
