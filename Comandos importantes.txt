@@ -68,3 +68,6 @@ ros2 run gymbrot_capture_image capture_image
 
 #Version con plantillas
 ros2 run gymbrot_capture_image template_matching
+
+#Iniciar
+ros2 run image_tools cam2image --ros-args -p burger_mode:=false -p frequency:=10.0 -p reliability:=reliable
