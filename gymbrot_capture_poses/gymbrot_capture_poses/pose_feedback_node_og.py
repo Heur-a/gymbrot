@@ -2,8 +2,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from std_msgs.msg import String
-
 import cv2
 import mxnet as mx
 import gluoncv
@@ -13,9 +11,6 @@ from gluoncv.data.transforms.pose import detector_to_alpha_pose, heatmap_to_coor
 import numpy as np
 import os
 import pandas as pd
-from std_msgs.msg import String
-from rclpy.qos import qos_profile_sensor_data
-
 
 cv2 = try_import_cv2()
 
@@ -62,9 +57,6 @@ def process_frame(frame, detector, estimator, ctx):
     pred_coords, confidence = select_best_person(pred_coords, confidence)
 
     return pred_coords, confidence, (height, width)
-def extraer_features(coords_array):
-    # coords_array: (17, 2) numpy array
-    pose_feats = []
 
 def calculate_leg_angles(coords, conf):
     """
@@ -416,7 +408,7 @@ class PoseComparisonNode(Node):
         self.detector = get_model('ssd_512_mobilenet1.0_coco', pretrained=True, ctx=self.ctx)
         self.detector.reset_class(classes=['person'], reuse_weights={'person': 'person'})
 
-        self.get_logger().info("🔄 Cargando modelo de pose...")
+        self.get_logger().info("Cargando modelo de pose...")
         self.estimator = get_model('alpha_pose_resnet101_v1b_coco', pretrained=True, ctx=self.ctx)
 
         csv_path = 'src/gymbrot/rosweb/assets/dataset_ejercicios/csv_output/pose_keypoints_dataset.csv'
@@ -440,25 +432,21 @@ class PoseComparisonNode(Node):
             Image,
             '/image',
             self.image_callback,
-            qos_profile_sensor_data,
+            10
         )
-        self.pose_feedback_pub = self.create_publisher(String, '/pose_feedback', 10)
-        self.pose_image_pub = self.create_publisher(Image, '/pose', 10)
-        self.bridge = CvBridge()
 
     def image_callback(self, msg):
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         except CvBridgeError as e:
-            self.get_logger().error(f"❌ Error al convertir imagen: {e}")
+            self.get_logger().error(f"Error al convertir imagen ROS a OpenCV: {e}")
             return
 
         self.process_quadriceps_exercise(frame)
 
     def process_quadriceps_exercise(self, frame):
         coords, conf, shape = process_frame(frame, self.detector, self.estimator, self.ctx)
-        # Iniciar la variable desde el principio
-        full_feedback = " "
+        
         if coords is None:
             self.get_logger().info("No se detectó persona en la imagen")
             return
@@ -488,7 +476,7 @@ class PoseComparisonNode(Node):
                     if phase_angle == "inicio" and self.last_phase == "final":
                         self.repetition_count += 1
                     self.last_phase = phase_angle
-        full_feedback += str(phase_angle)
+
         # RESULTADO
         self.get_logger().info("\n" + "=" * 60)
         self.get_logger().info("ANÁLISIS DE EXTENSIÓN DE CUÁDRICEPS:")
@@ -502,30 +490,17 @@ class PoseComparisonNode(Node):
                 self.get_logger().info(f"Comparación con dataset: {best_dataset_label} ({best_dataset_sim*100:.1f}%)")
         
         # Evaluación de calidad
-        if phase_angle and conf_angle > 0.5:
+        if phase_angle and conf_angle > 0.5:  
             if conf_angle > 0.9:
-                calidad = "✅ ¡Excelente ejecución!"
+                self.get_logger().info("✅ ¡Excelente ejecución!")
             elif conf_angle > 0.85:
-                calidad = "✅ ¡Buena ejecución!"
+                self.get_logger().info("✅ ¡Buena ejecución!")
             elif conf_angle > 0.65:
-                calidad = "⚠️  Ejecución aceptable"
+                self.get_logger().info("⚠️  Ejecución aceptable")
             else:
-                calidad = "⚠️  Necesita mejorar la técnica"
-            full_feedback += calidad + "\n"
-        else:
-            calidad = "Confianza insuficiente para evaluación"
-        self.get_logger().info(full_feedback)
-
-    # Publicar todo el mensaje en /pose_feedback
-        feedback_msg = String()
-        feedback_msg.data = full_feedback
-        self.pose_feedback_pub.publish(feedback_msg)
-        # Publicar imagen en /pose
-        try:
-            image_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
-            self.pose_image_pub.publish(image_msg)
-        except Exception as e:
-            self.get_logger().error(f"Error al convertir/publicar la imagen: {e}")
+                self.get_logger().info("⚠️  Necesita mejorar la técnica")
+        
+        self.get_logger().info("=" * 60 + "\n")
 
 def main(args=None):
     rclpy.init(args=args)
